@@ -368,6 +368,8 @@ def equi_partition(T, num_blocks):
         print("you didn't set up functionality for more than 4 partitions yet!")
     return [e, e1, e2]
 
+
+
 def equi_split(T):
     #Returns the partition if T can be split evenly in two
     #Else returns False
