@@ -37,8 +37,8 @@ def log_number_trees(G):
     diag_L = np.diag(splumatrix.L.A)
     diag_U = np.diag(splumatrix.U.A)
     try:
-        S_log_L = [np.log(np.abs(s)) for s in diag_L]
-        S_log_U = [np.log(np.abs(s)) for s in diag_U]
+        S_log_L = [np.abs(np.log(np.abs(s))) for s in diag_L]
+        S_log_U = [np.abs(np.log(np.abs(s))) for s in diag_U]
     except Warning:
         print(diag_U)
     LU_prod = np.sum(S_log_U) + np.sum(S_log_L)
@@ -54,7 +54,7 @@ def log_number_spanning_tree(G):
     spectrum = nx.laplacian_spectrum(G)
     non_zero_spect = np.delete(spectrum, 0)
 
-    return np.sum(np.log(non_zero_spect))
+    return np.prod(non_zero_spect)
 
 m = 3
 n = 3
@@ -164,6 +164,7 @@ def children(H_nodes,G):
         H_nodes.add(n)
         admissable_children.append(copy.deepcopy(H_nodes))
         H_nodes.remove(n)
+        
     return admissable_children
 
 def build_tree(G,k, num_level):
@@ -176,7 +177,6 @@ def build_tree(G,k, num_level):
     for i in range(k + 1):
         tree.append([])
     
-    empty_graph = nx.Graph()
     tree[0].append(set())
     
     # go through each level of the tree
@@ -189,6 +189,7 @@ def build_tree(G,k, num_level):
         # get the children for the next level in parallel
         with concurrent.futures.ProcessPoolExecutor() as executor:
             for out in executor.map(children, random_sample, itertools.repeat(G,fixed_num_level)): #subgraph in random_sample:
+
                 tree[i+1] += out
             tree[i] = []
     return tree
@@ -200,8 +201,8 @@ def prune(T):
     #Let's understand if we can prune this without restricting the isomorphism classes
     return 1
 
-def helper_log_number_trees(G, S):
-    return log_number_spanning_tree(nx.induced_subgraph(G, S))
+def helper_number_trees(G, S):
+    return log_number_trees(nx.induced_subgraph(G, S))
     
     
 if __name__ == "__main__":
@@ -215,7 +216,10 @@ if __name__ == "__main__":
         G.node[v]["weight"] = random.uniform(0,1)
         
     k = 3
-    subgraph_tree = build_tree(G, k**2, 1000)
+    subgraph_tree = build_tree(G, k**2, np.inf)
+    
+
+    G = nx.grid_graph([10,10])
     
     num_trees = []
     subgraphs = []
@@ -223,7 +227,7 @@ if __name__ == "__main__":
     print(len(subgraph_tree[n-1]))
     # compute number of spanning trees in each subgraph in parallel
     with concurrent.futures.ProcessPoolExecutor() as executor:
-            for out in executor.map(helper_log_number_trees, itertools.repeat(G, len(subgraph_tree[n-1])), subgraph_tree[n-1]):
+            for out in executor.map(helper_number_trees, itertools.repeat(G, len(subgraph_tree[n-1])), subgraph_tree[n-1]):
                 num_trees.append(out)
                 
     '''
@@ -234,6 +238,6 @@ if __name__ == "__main__":
         
     print(np.max(num_trees))
     H = nx.grid_graph([k,k])
-    print(log_number_trees(H))
+    print(log_number_spanning_tree(H))
 
 
