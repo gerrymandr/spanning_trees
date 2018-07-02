@@ -14,7 +14,8 @@ import numpy as np
 import copy
 from tqdm import tqdm
 import warnings
-
+import concurrent.futures
+import itertools
 
 
     
@@ -43,6 +44,17 @@ def log_number_trees(G):
     LU_prod = np.sum(S_log_U) + np.sum(S_log_L)
     return LU_prod
 
+def number_trees_via_spectrum(G):
+    n = len(G.nodes())
+    S = nx.laplacian_spectrum(G)[1:]
+    logdet = np.sum ( [np.log(s) for s in S]) - np.log(n)
+    return logdet
+
+def log_number_spanning_tree(G):
+    spectrum = nx.laplacian_spectrum(G)
+    non_zero_spect = np.delete(spectrum, 0)
+
+    return np.sum(np.log(non_zero_spect))
 
 m = 3
 n = 3
@@ -174,9 +186,11 @@ def build_tree(G,k, num_level):
         if fixed_num_level < len(tree[i]):
             print("Cut at level", i, "by a difference of:,", len(tree[i]) - fixed_num_level)
         random_sample = random.sample(tree[i], fixed_num_level)
-        for subgraph in random_sample:
-            tree[i+1] += children(subgraph, G)
-        tree[i] = []
+        # get the children for the next level in parallel
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            for out in executor.map(children, random_sample, itertools.repeat(G,fixed_num_level)): #subgraph in random_sample:
+                tree[i+1] += out
+            tree[i] = []
     return tree
     
     
@@ -185,6 +199,9 @@ def prune(T):
     #Remove automorphsim duplicates from among the subgraphs
     #Let's understand if we can prune this without restricting the isomorphism classes
     return 1
+
+def helper_log_number_trees(G, S):
+    return log_number_spanning_tree(nx.induced_subgraph(G, S))
     
     
 if __name__ == "__main__":
@@ -198,14 +215,22 @@ if __name__ == "__main__":
         G.node[v]["weight"] = random.uniform(0,1)
         
     k = 3
-    subgraph_tree = build_tree(G, k**2, 100000)
+    subgraph_tree = build_tree(G, k**2, 1000)
     
     num_trees = []
     subgraphs = []
     n = len(subgraph_tree)
+    print(len(subgraph_tree[n-1]))
+    # compute number of spanning trees in each subgraph in parallel
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+            for out in executor.map(helper_log_number_trees, itertools.repeat(G, len(subgraph_tree[n-1])), subgraph_tree[n-1]):
+                num_trees.append(out)
+                
+    '''
     for S in subgraph_tree[n-1]:
         num_trees.append(log_number_trees(nx.induced_subgraph(G, S)))
-        subgraphs.append(nx.induced_subgraph(G,S))
+    '''
+
         
     print(np.max(num_trees))
     H = nx.grid_graph([k,k])
