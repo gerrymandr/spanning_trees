@@ -13,7 +13,6 @@ import random
 import numpy as np
 import copy
 from tqdm import tqdm
-import warnings
 import concurrent.futures
 import itertools
 
@@ -36,11 +35,8 @@ def log_number_trees(G):
     splumatrix = scipy.sparse.linalg.splu(m)
     diag_L = np.diag(splumatrix.L.A)
     diag_U = np.diag(splumatrix.U.A)
-    try:
-        S_log_L = [np.log(np.abs(s)) for s in diag_L]
-        S_log_U = [np.log(np.abs(s)) for s in diag_U]
-    except Warning:
-        print(diag_U)
+    S_log_L = [np.log(np.abs(s)) for s in diag_L]
+    S_log_U = [np.log(np.abs(s)) for s in diag_U]
     LU_prod = np.sum(S_log_U) + np.sum(S_log_L)
     return LU_prod
 
