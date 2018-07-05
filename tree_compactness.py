@@ -37,8 +37,8 @@ def log_number_trees(G):
     diag_L = np.diag(splumatrix.L.A)
     diag_U = np.diag(splumatrix.U.A)
     try:
-        S_log_L = [np.abs(np.log(np.abs(s))) for s in diag_L]
-        S_log_U = [np.abs(np.log(np.abs(s))) for s in diag_U]
+        S_log_L = [np.log(np.abs(s)) for s in diag_L]
+        S_log_U = [np.log(np.abs(s)) for s in diag_U]
     except Warning:
         print(diag_U)
     LU_prod = np.sum(S_log_U) + np.sum(S_log_L)
@@ -51,10 +51,11 @@ def number_trees_via_spectrum(G):
     return logdet
 
 def log_number_spanning_tree(G):
+    n = G.number_of_nodes()
     spectrum = nx.laplacian_spectrum(G)
     non_zero_spect = np.delete(spectrum, 0)
 
-    return np.prod(non_zero_spect)
+    return np.prod(non_zero_spect)/n
 
 m = 3
 n = 3
@@ -70,12 +71,6 @@ for x in H.edges():
     b = x[1]
     H.edges[x]["weight"] = (d*np.abs(a[0] - b[0]) + (1/d)* np.abs(a[1] - b[1]))
 
-
-W_G = log_weighted_number_trees(G)
-W_H = log_weighted_number_trees(H)
-print("WG",W_G)
-print("WH", W_H)
-print("W_G - W_H", W_G - W_H)
 
 #W_G 98.44804291763761
 #W_H 209.95528522499345
@@ -202,11 +197,11 @@ def prune(T):
     return 1
 
 def helper_number_trees(G, S):
-    return log_number_trees(nx.induced_subgraph(G, S))
+    return log_number_spanning_tree(nx.induced_subgraph(G, S)), S
     
     
 if __name__ == "__main__":
-    G = nx.grid_graph([10,10])
+    G = nx.grid_graph([8,8])
     G_edges = G.edges()
     for e in G_edges:
         G.edges[e]["weight"] = random.uniform(0,1)
@@ -216,20 +211,28 @@ if __name__ == "__main__":
         G.node[v]["weight"] = random.uniform(0,1)
         
     k = 3
-    subgraph_tree = build_tree(G, k**2, np.inf)
+    subgraph_tree = build_tree(G, 10, np.inf)
     
 
-    G = nx.grid_graph([10,10])
+    G = nx.grid_graph([8,8])
     
     num_trees = []
     subgraphs = []
+    
+    #max_num = 0
+    
     n = len(subgraph_tree)
     print(len(subgraph_tree[n-1]))
     # compute number of spanning trees in each subgraph in parallel
     with concurrent.futures.ProcessPoolExecutor() as executor:
-            for out in executor.map(helper_number_trees, itertools.repeat(G, len(subgraph_tree[n-1])), subgraph_tree[n-1]):
+            for out, S in executor.map(helper_number_trees, itertools.repeat(G, len(subgraph_tree[n-1])), subgraph_tree[n-1]):
                 num_trees.append(out)
-                
+                subgraphs.append(S)
+                '''
+                if out > max_num:
+                    max_num = out
+                    max_config = S
+                '''
     '''
     for S in subgraph_tree[n-1]:
         num_trees.append(log_number_trees(nx.induced_subgraph(G, S)))
@@ -237,7 +240,7 @@ if __name__ == "__main__":
 
         
     print(np.max(num_trees))
-    H = nx.grid_graph([k,k])
-    print(log_number_spanning_tree(H))
+    H = nx.grid_graph([2,5])
+    print(log_number_trees(H))
 
 
