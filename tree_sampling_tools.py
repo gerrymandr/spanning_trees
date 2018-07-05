@@ -6,8 +6,9 @@ Created on Wed Jul  4 11:43:31 2018
 """
 
 #####For creating a spanning tree
-
+import networkx as nx
 def srw(G,a):
+    '''takes'''
     wet = set([a])
     trip = [a]
     while len(wet) < len(G.nodes()):
@@ -29,7 +30,7 @@ def forward_tree(G,a):
 def random_spanning_tree(G):
     #It's going to be faster to use the David Wilson algorithm here instead.
     T_edges = forward_tree(G, random.choice(list(G.nodes())))
-    T = nx.Graph()
+    T = nx.DiGraph()
     T.add_nodes_from(list(G.nodes()))
     T.add_edges_from(T_edges)
     return T

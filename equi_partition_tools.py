@@ -21,7 +21,20 @@ def return_equipartition_if_exists(graph, tree, num_blocks):
         print("impossible due to divisibility")
         return None
 
+
+def build_node_weights(tree):
+    '''arbitrarily directs the tree, and adds weights to each node to make
+    dynamical code for finding the equi-split fast
     
+    :tree: the tree we want to split. This needs to be passed to this as a
+    directed tree rooted at vertex q...
+    
+    #Todo: Note that in the future we should be careful about
+    #keeping track of the orientation on our trees that come from the various
+    #constructions
+    '''
+
+    return 
     
 def find_cut_of_size(graph, tree, size):
     '''
@@ -59,7 +72,7 @@ def best_edge_for_equipartition(graph,tree, num_blocks  = 2):
     #A better algorithm is just to do this recursively... if there is a perfect
     partitioning...
     
-    TODO
+    TODO -- USE DYNAMICAL PROGRAMMING!!
 
 
     graph = the graph to be partitioned
