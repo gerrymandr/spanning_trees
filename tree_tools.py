@@ -20,17 +20,26 @@ import scipy.linalg
 from scipy.sparse import csc_matrix
 import scipy
 from scipy import array, linalg, dot
+import equi_partition_tools
+import projection_tools
+
 #from naive_graph_partitions import k_connected_graph_partitions
 
 ######Tree counting
 
-def log_number_trees(G, weight = False):
+def log_number_trees(graph, weight = False):
+    '''Computes the log of the number of trees, weighted or unweighted. 
+    
+    :graph: The input graph
+    :weight: the edge variable name that describes the edge weights
+    
+    '''
     #Kirkoffs is the determinant of the minor..
     #at some point this should be replaced with a Cholesky decomposition based algorithm, which is supposedly faster. 
     if weight == False:
-        m = nx.laplacian_matrix(G)[1:,1:]
+        m = nx.laplacian_matrix(graph)[1:,1:]
     if weight == True:
-        m = nx.laplacian_matrix(G, weight = "weight")[1:,1:]
+        m = nx.laplacian_matrix(graph, weight = "weight")[1:,1:]
     m = csc_matrix(m)
     splumatrix = scipy.sparse.linalg.splu(m)
     diag_L = np.diag(splumatrix.L.A)
@@ -41,169 +50,110 @@ def log_number_trees(G, weight = False):
     return  LU_prod
 
 
-def score_tree_edges_pair(G,T,e):
-    partition = R(G,T,e)
+def likelihood_tree_edges_pair(graph,tree,edge_list):
+    '''
+    
+    This computes the partition associated ot (graph, tree, edge_list)
+    and computes the log-likelihood that that partition is drawn via uniform tree
+    with uniform edge_list sampling method
+    
+    graph = the graph to be partitioned
+    tree = a chosen spanning tree on the graph
+    edge_list = list of edges that determine the partition
+    
+    there are two terms in the log-likelihood:
+        tree_term = from the number of spanning trees within each block
+        connector_term = from the number of ways to pick a spanning tree to 
+        hook up the blocks
+    
+    the way that connector_term works:
+        1. It builds a graph whose nodes are the blocks in the partitions
+        and whose multi-edges correspond to the set of edges connecting those blocks
+        2. It uses the multi-graph (or weighted graph) version of Kirkoffs theorem to compute the
+        ways to 
+        
+    the way that tree_term works:
+        for each block of hte partition, it compute the number of spanning trees
+        that that induced subgraph as.
+    returns (tree term + connector term)
+    TODO -- rewrite score to be 1 / this
+    
+    '''
+    partition = projection_tools.remove_edges_map(graph, tree, edge_list)
+    #this gets the list of subgraphs from (tree, edges) pair
     tree_term = np.sum([log_number_trees(g) for g in partition])
 
-    #Use the weighted version of Kirkoffs theorem-- weight each edge by the number of cut edges
-    #I.e. build the adjacency graph of the partition, weight by cut size
-    #This counts the number of ways to extend spanning trees on the subgraphs of the parittion
-    #individually, to a spanning tree on all of G
+    #Building connector term:
     connector_graph = nx.Graph()
     connector_graph.add_nodes_from(partition)
-    for x in partition:
-        for y in partition:
-            if x != y:
-                cutedges = cut_edges(G, x,y)
+    for subgraph_1 in partition:
+        for subgraph_2 in partition:
+            if subgraph_1 != subgraph_2:
+                cutedges = cut_edges(graph, subgraph_1, subgraph_2)
                 if cutedges != []:
-                    connector_graph.add_edge(x,y, weight = len(cutedges))
+                    connector_graph.add_edge(subgraph_1, subgraph_2, weight = len(cutedges))
     cut_weight = log_number_trees(connector_graph, True)
-    return -1 * (tree_term + cut_weight)
-    #YOU NEED THIS -1 -- the score is the inverse! Don't take it away!
+    return (tree_term + cut_weight)
     
-#####For creating a spanning tree
 
-def srw(G,a):
-    wet = set([a])
-    trip = [a]
-    while len(wet) < len(G.nodes()):
-        b = random.choice(list(G.neighbors(a)))
-        wet.add(b)
-        trip.append(b)
-        a = b
-    return trip
-
-def forward_tree(G,a):
-    walk = srw(G,a)
-    edges = []
-    for x in G.nodes():
-        if (x != walk[0]):
-            t = walk.index(x)
-            edges.append( [walk[t], walk[t-1]])
-    return edges
-
-def random_spanning_tree(G):
-    #It's going to be faster to use the David Wilson algorithm here instead.
-    T_edges = forward_tree(G, random.choice(list(G.nodes())))
-    T = nx.Graph()
-    T.add_nodes_from(list(G.nodes()))
-    T.add_edges_from(T_edges)
-    return T
-
-def random_spanning_tree_wilson(G):
-    #The David Wilson random spanning tree algorithm
+def effective_resistance(G, vertex_a, vertex_2, LU = 0):
+    #Can pass LU decomposition...
     
-    return T
+    return None
+    
+
 #####For lifting:
 
-def cut_edges(G, G_A,G_B):
-    #Finds the edges in G from G_A to G_B
-    edges_of_G = list(G.edges())
+def cut_edges(graph, subgraph_1, subgraph_2):
+    '''Finds the edges in graph from 
+    subgraph_1 to subgraph_2
+    
+    :graph: The ambient graph
+    :subgraph_1: 
+    :subgraph_2:
+        
+    TODO: Think about algorithm
+    
+    
+    '''
+    edges_of_graph = list(graph.edges())
 
     list_of_cut_edges = []
-    for e in edges_of_G:
-        if e[0] in G_A and e[1] in G_B:
+    for e in edges_of_graph:
+        if e[0] in subgraph_1 and e[1] in subgraph_2:
             list_of_cut_edges.append(e)
-        if e[0] in G_B and e[1] in G_A:
+        if e[0] in subgraph_2 and e[1] in subgraph_1:
             list_of_cut_edges.append(e)
     return list_of_cut_edges
 
-def random_lift(G, subgraphs):
-    number_of_parts = len(subgraphs)
-    trees = [random_spanning_tree(g) for g in subgraphs]
+
+###Tree walk
     
-    #This builds a graph with nodes the subgraph, and they are connected
-    #if there is an edge connecting the two subgraphs
-    #and each edge gets 'choices' = to all the edges in G that connect the two subgraphs
-    connector_graph = nx.Graph()
-    connector_graph.add_nodes_from(subgraphs)
-    for x in subgraphs:
-        for y in subgraphs:
-            if x != y:
-                cutedges = cut_edges(G, x,y)
-                if cutedges != []:
-                    connector_graph.add_edge(x,y, choices = cutedges)
-                    #need to worry about directendess!!???
-                    
-                    
-    connector_meta_tree = random_spanning_tree(connector_graph)
-    connector_tree = nx.Graph()
-    for e in connector_meta_tree.edges():
-        w = random.choice(connector_graph[e[0]][e[1]]['choices'])
-        connector_tree.add_edges_from([w])
-        
+def propose_step(graph,tree):
+    '''
+    this proposes a basis exchange move on the spanning trees
+    definedin Broder //// also in /// (for matroid case)
+    :graph: the ambient graph
+    :tree: the current spanning tree
     
-    T = nx.Graph()
-    for x in trees:
-        T.add_edges_from(x.edges())
-    T.add_edges_from(connector_tree.edges())
-    e = random.sample(list(T.edges()),number_of_parts - 1)
-    return [T,e]
-
-######Projection tools:
+    '''
+    tree_edges = list(tree.edges())
+    tree_edges_flipped = [ tuple((e[1], e[0])) for e in tree_edges]
+    graph_edges = graph.edges()
+    #Because of stupid stuff in networkx - if we don't include the flipped
+    #list also, then the problem is that graph_edges might have an edge
+    #stored as (a,b) and tree_edges the same edge stored as (b,a), so it
+    #won't realize not to use that edge
     
-def R(G,T,edge_list):
-    T.remove_edges_from(edge_list)
-    components = list(nx.connected_components(T))
-    T.add_edges_from(edge_list)
-    subgraphs = [nx.induced_subgraph(G, A) for A in components]
-    return subgraphs
-
-def R_all(G,T,n):
-    T_edges = set(T.edges())
-    partitions = []
-
-    for e in itertools.combinations(T_edges, n):
-        partitions.append(R(G,T,list(e)))
-    return partitions
-
-def R_sample(G,T,n,m):
-    T_edges = set(T.edges())
-    partitions = []
-    
-    iteration = random.sample(list(itertools.combinations(T_edges, n)), m)
-    
-    for e in iteration:
-        partitions.append(R(G,T,list(e)))
-    return partitions
-
-    
-
-def best_edge_for_equipartition(G,T):
-    list_of_edges = list(T.edges())
-    best = 0
-    candidate = 0
-    for e in list_of_edges:
-        score = equi_score_tree_edge_pair(G,T,e)
-        if score > best:
-            best = score
-            candidate = e
-    return [candidate, best]
-
-def equi_score_tree_edge_pair(G,T,e):
-    T.remove_edges_from([e])
-    components = list(nx.connected_components(T))
-    T.add_edges_from([e])
-    A = len(components[0])
-    B = len(components[1])
-    x =  np.min([A / (A + B), B / (A + B)])
-    return x
-
-###Metropolis-Hastings tools
-    
-def propose_step(G,T):
-    T_edges = list(T.edges())
-    T_edges_t = [ tuple((e[1], e[0])) for e in T_edges]
-    #Because of stupid stuff in networkx
-    A = [e for e in G.edges() if e not in T_edges and e not in T_edges_t]
-    e = random.choice(A)
-    T.add_edges_from([e])
-    C = nx.find_cycle(T, orientation = 'ignore')
-    w = random.choice(C)
-    U = nx.Graph()
-    U.add_edges_from(list(T.edges()))
-    U.remove_edges_from([w])
-    T.remove_edges_from([e])
+    edges_not_in_tree = [e for e in graph_edges if e not in tree_edges and e not in tree_edges_flipped]
+    e = random.choice(edges_not_in_tree)
+    tree.add_edges_from([e])
+    cycle = nx.find_cycle(tree, orientation = 'ignore')
+    w = random.choice(cycle)
+    new_tree = nx.Graph()
+    new_tree.add_edges_from(list(tree.edges()))
+    new_tree.remove_edges_from([w])
+    tree.remove_edges_from([e])
 #    print(len(U.edges()))
 #    print(U.edges())
     return U
@@ -231,11 +181,16 @@ def MH_step(G, T,e, equi = False, MH = True):
     if MH == False:
         return [U,e2]
 
+
+
+
+
         
 ########Validation -- 
+        
             
        
-###Histogram creation tools
+###Emperical distribution creation tools
 
 def count(x, visited_partitions):
 
@@ -257,13 +212,7 @@ def make_histogram(A, visited_partitions):
     for x in A_node_lists:
         dictionary[str(x)] = count(x,visited_partitions) / len(visited_partitions)
     return dictionary
-        
-def subgraph_to_node(visited_partitions):
-    partition_list  = []
-    for partitions in visited_partitions:
-        partition_list.append(set([frozenset(g.nodes()) for g in partitions]))
-        
-    return partition_list
+
 ##########################
     
 def test(grid_size, k_part, steps = 100, equi = False, MH = True):
@@ -331,57 +280,6 @@ def tree_walk(grid_size, k_part, steps = 100, MH = True, how_many = 'one', deman
         
     return visited_partitions
 
-def random_equi_partition_trees(graph, k_part, number = 100):
-    equi_partitions = [] 
-    counter = 0
-    while len(equi_partitions) < number:
-        counter += 1
-        T = random_spanning_tree(graph)
-        e = equi_partition(T, k_part)
-        if e != False:
-            print(len(equi_partitions), "waiting time:", counter)
-            equi_partitions.append( R(graph, T, e) )
-            counter = 0
-    return equi_partitions
-    
-def equi_partition(T, num_blocks):
-    #Returns the partition if T can give an equi partition in num_blocks,
-    #Else return false
-    
-    #Currently this is hard coded for 4 partitions -- but there shold be a good
-    #and scalable algorithm
-    if num_blocks == 4:
-        e = equi_split(T)
-        if e == False:
-            return False
-        if e != False:
-            T.remove_edges_from([e])
-            components = list(nx.connected_component_subgraphs(T))
-            T.add_edges_from([e])
-            e1 = equi_split(components[0])
-            if e1 == False:
-                return False
-            e2 = equi_split(components[1])
-            if e2 == False:
-                return False
-    else:
-        print("you didn't set up functionality for more than 4 partitions yet!")
-    return [e, e1, e2]
 
-
-
-def equi_split(T):
-    #Returns the partition if T can be split evenly in two
-    #Else returns False
-    T_edges = T.edges()
-    for e in T_edges:
-        T.remove_edges_from([e])
-        components = list(nx.connected_components(T))
-        T.add_edges_from([e])
-        A = len(components[0])
-        B = len(components[1])
-        if A == B:
-            return e
-    return False
     
     
