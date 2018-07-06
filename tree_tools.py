@@ -13,17 +13,13 @@ Created on Tue Jun 26 12:01:21 2018
 """
 
 import networkx as nx
-import random
-import itertools
 import numpy as np
 import scipy.linalg
 from scipy.sparse import csc_matrix
 import scipy
 from scipy import array, linalg, dot
-import equi_partition_tools
+from equi_partition_tools import equi_split
 import projection_tools
-
-#from naive_graph_partitions import k_connected_graph_partitions
 
 ######Tree counting
 
@@ -94,7 +90,7 @@ def likelihood_tree_edges_pair(graph,tree,edge_list):
                     connector_graph.add_edge(subgraph_1, subgraph_2, weight = len(cutedges))
     cut_weight = log_number_trees(connector_graph, True)
     return (tree_term + cut_weight)
-    
+
 
 def effective_resistance(G, vertex_a, vertex_2, LU = 0):
     #Can pass LU decomposition...
@@ -112,9 +108,7 @@ def cut_edges(graph, subgraph_1, subgraph_2):
     :subgraph_1: 
     :subgraph_2:
         
-    TODO: Think about algorithm
-    
-    
+
     '''
     edges_of_graph = list(graph.edges())
 
@@ -125,72 +119,11 @@ def cut_edges(graph, subgraph_1, subgraph_2):
         if e[0] in subgraph_2 and e[1] in subgraph_1:
             list_of_cut_edges.append(e)
     return list_of_cut_edges
-
-
-###Tree walk
-    
-def propose_step(graph,tree):
-    '''
-    this proposes a basis exchange move on the spanning trees
-    definedin Broder //// also in /// (for matroid case)
-    :graph: the ambient graph
-    :tree: the current spanning tree
-    
-    '''
-    tree_edges = list(tree.edges())
-    tree_edges_flipped = [ tuple((e[1], e[0])) for e in tree_edges]
-    graph_edges = graph.edges()
-    #Because of stupid stuff in networkx - if we don't include the flipped
-    #list also, then the problem is that graph_edges might have an edge
-    #stored as (a,b) and tree_edges the same edge stored as (b,a), so it
-    #won't realize not to use that edge
-    
-    edges_not_in_tree = [e for e in graph_edges if e not in tree_edges and e not in tree_edges_flipped]
-    e = random.choice(edges_not_in_tree)
-    tree.add_edges_from([e])
-    cycle = nx.find_cycle(tree, orientation = 'ignore')
-    w = random.choice(cycle)
-    new_tree = nx.Graph()
-    new_tree.add_edges_from(list(tree.edges()))
-    new_tree.remove_edges_from([w])
-    tree.remove_edges_from([e])
-#    print(len(U.edges()))
-#    print(U.edges())
-    return U
-    
-
-def MH_step(G, T,e, equi = False, MH = True):
-    n = len(e)
-    U = propose_step(G,T)
-    if equi == False:
-        e2 = random.sample(list(U.edges()),n)
-    if equi == True:
-        e2 = best_edge_for_equipartition(G,U)[0]
-    if MH == True:
-        current_score = score_tree_edges_pair(G,T,e)
-        new_score = score_tree_edges_pair(G, U, e2)
-        if new_score > current_score:
-            return [U,e2]
-        else:
-           p = np.exp(new_score - current_score)
-           a = np.random.uniform(0,1)
-           if a < p:
-               return [U,e2]
-           else:
-               return [T,e]
-    if MH == False:
-        return [U,e2]
-
-
-
-
-
-        
-########Validation -- 
-        
-            
+   
        
 ###Emperical distribution creation tools
+    
+#To do: estimate the entropy of the TaTbcut(a,b) distribution
 
 def count(x, visited_partitions):
 
@@ -214,72 +147,4 @@ def make_histogram(A, visited_partitions):
     return dictionary
 
 ##########################
-    
-def test(grid_size, k_part, steps = 100, equi = False, MH = True):
-    from naive_graph_partitions import k_connected_graph_partitions
-    #k_part = 3 nnum partitions
-    G = nx.grid_graph(grid_size)
-    A = list(k_connected_graph_partitions(G, k_part))
-    
-    ##Tree walks:
-    T = random_spanning_tree(G)
-    e = list(T.edges())[0:k_part - 1]
-    visited_partitions = []
-    for i in range(steps):
-        new = MH_step(G, T, e, equi, MH)
-        #This is the step that takes in the graph G, the spanning tree T, 
-        #and the list of edges e that we are currently planning to delete.
-        T = new[0]
-        e = new[1]
-        visited_partitions.append(R(G,T,e))
-        
-        #R(emoval) is the function that returns the partition you get by removing e from T
-    ###
-    
-    ##Statistics from output from tree tools:
-    visited_partitions_node_format = subgraph_to_node(visited_partitions)
-    histogram = make_histogram(A, visited_partitions_node_format)
-    total_variation = 0
-    for k in histogram.keys():
-        total_variation += np.abs( histogram[k] - 1 / len(A))
-    print("total variation", total_variation)
-    return [histogram, A, visited_partitions]
-     
-def TV(p,q):
-#test comment
-    total_variation = 0
-    for k in p.keys():
-        total_variation += np.abs(p[k] - q[k])
-    return total_variation
-#h1, A, partitions = test([2,3], 3)
-    
-def tree_walk(grid_size, k_part, steps = 100, MH = True, how_many = 'one', demand_equi = False):
-    G = nx.grid_graph(grid_size)
-    ##Tree walks:
-    T = random_spanning_tree(G)
-    e = list(T.edges())[0:k_part - 1]
-    visited_partitions = []
-    for i in range(steps):
-        if demand_equi == True:
-            #new = Equi_Step(G,T,e, False, MH)
-            print("You haven't set this up yet!")
-        if demand_equi == False:
-            new = MH_step(G, T, e, False, MH)
-        #This is the step that takes in the graph G, the spanning tree T, 
-        #and the list of edges e that we are currently planning to delete.
-        T = new[0]
-        e = new[1]
-        if how_many == 1:
-            visited_partitions.append(R(G,T))
-        if how_many == 'all':
-            T = random_spanning_tree(G)
-            visited_partitions += R_all(G,T, k_part)
-        if (how_many != 1) and (type(how_many) == int):
-            T = random_spanning_tree(G)
-            visited_partitions += R_sample(G,T, k_part, how_many)
-        
-    return visited_partitions
-
-
-    
-    
+ 

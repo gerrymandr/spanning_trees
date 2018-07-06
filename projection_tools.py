@@ -5,8 +5,12 @@ Created on Wed Jul  4 11:44:50 2018
 @author: MGGG
 """
 
-
-
+from equi_partition_tools import equi_split
+import itertools
+import networkx as nx
+from tree_sampling_tools import random_spanning_tree
+import random
+from tree_tools import cut_edges
 ######Projection tools:
     
 '''use exercise 2 on dual graph and trees for isospannimetric 
@@ -54,7 +58,7 @@ def partition_spectrum(graph,tree,num_blocks):
     partitions = []
 
     for edge_list in itertools.combinations(tree_edges, num_blocks - 1):
-        partitions.append(partitioning_map(graph,tree,list(edge_list)))
+        partitions.append(remove_edges_map(graph,tree,list(edge_list)))
     return partitions
 
 def partition_spectrum_sample(graph,tree,num_blocks,sample_size):
@@ -75,25 +79,29 @@ def partition_spectrum_sample(graph,tree,num_blocks,sample_size):
                                         num_blocks)), sample_size)
     
     for edge_list in iteration:
-        partitions.append(partitioning_map(graph,tree,list(edge_list)))
+        partitions.append(partition_spectrum(graph,tree,list(edge_list)))
     return partitions
 
 
-def random_lift(G, subgraphs):
+def random_lift(graph, subgraphs):
+    '''
+    
+    '''
+    print("You haven't fixed this to be directed...)
     number_of_parts = len(subgraphs)
-    trees = [random_spanning_tree(g) for g in subgraphs]
+    subgraph_trees = [random_spanning_tree(g) for g in subgraphs]
     
     #This builds a graph with nodes the subgraph, and they are connected
     #if there is an edge connecting the two subgraphs
     #and each edge gets 'choices' = to all the edges in G that connect the two subgraphs
     connector_graph = nx.Graph()
     connector_graph.add_nodes_from(subgraphs)
-    for x in subgraphs:
-        for y in subgraphs:
-            if x != y:
-                cutedges = cut_edges(G, x,y)
+    for subgraph_1 in subgraphs:
+        for subgraph_2 in subgraphs:
+            if subgraph_1 != subgraph_2:
+                cutedges = cut_edges(graph, subgraph_1, subgraph_2)
                 if cutedges != []:
-                    connector_graph.add_edge(x,y, choices = cutedges)
+                    connector_graph.add_edge(subgraph_1, subgraph_2, choices = cutedges)
                     #need to worry about directendess!!???
                     
                     
@@ -104,9 +112,9 @@ def random_lift(G, subgraphs):
         connector_tree.add_edges_from([w])
         
     
-    T = nx.Graph()
-    for x in trees:
-        T.add_edges_from(x.edges())
-    T.add_edges_from(connector_tree.edges())
-    e = random.sample(list(T.edges()),number_of_parts - 1)
-    return [T,e]
+    tree = nx.Graph()
+    for sub_tree in subgraph_trees:
+        tree.add_edges_from(sub_tree.edges())
+    tree.add_edges_from(connector_tree.edges())
+    edge_list = random.sample(list(T.edges()),number_of_parts - 1)
+    return [tree, edge_list]

@@ -7,94 +7,7 @@ Created on Wed Jul  4 11:42:30 2018
 
 ''' Equipartition tools'''
 
-def return_equipartition_if_exists(graph, tree, num_blocks):
-    '''
-    graph = the graph to be partitioned
-    tree = a chosen spanning tree on the graph
-    num_blocks = number of blocks in the partitions returned
-    
-    This returns the num_blocks equi-partition if it exists. Otherwise returns
-    none.
-    '''
-    block_size = len(graph.nodes()) / num_blocks
-    if int(block_size) != block_size:
-        print("impossible due to divisibility")
-        return None
-
-
-def build_node_weights(tree):
-    '''arbitrarily directs the tree, and adds weights to each node to make
-    dynamical code for finding the equi-split fast
-    
-    :tree: the tree we want to split. This needs to be passed to this as a
-    directed tree rooted at vertex q...
-    
-    #Todo: Note that in the future we should be careful about
-    #keeping track of the orientation on our trees that come from the various
-    #constructions
-    '''
-
-    return 
-    
-def find_cut_of_size(graph, tree, size):
-    '''
-    graph = the graph to be partitioned
-    tree = a chosen spanning tree on the graph
-    ratio = a number between 0 and 1
-    
-    this returns the edge so that the (tree, edge) pair gives a partition
-    with smallest piece of specified size
-    '''
-    tree_edges = tree.edges()
-    for edge in tree_edges:
-        if equi_score_tree_edge_pair(graph, tree, edge) == size:
-            return edge
-    return None
-            
-    
-
-def best_edge_for_equipartition(graph,tree, num_blocks  = 2):
-    '''
-    Note: Currently this only works for 2 partitions!!
-    NOte: this is not the best way to do this. .... what you should do instead
-    is start at any leaf, and move the edge (by gradient ascent kind of thing)
-    until you get to a global min for balancing.
-    
-    Does this actually work? 
-    
-    Same for tuples -- check all possible moves, and gradient ascent. If at a
-    critical point, return. (Criticla point means -- all possible local moves
-    decrease the goodness f the balance...)
-    
-    I'm confused about how this touches balanced cut: 
-        http://lucafoschini.com/papers/Balanced_Algorithmica.pdf
-        
-    #A better algorithm is just to do this recursively... if there is a perfect
-    partitioning...
-    
-    TODO -- USE DYNAMICAL PROGRAMMING!!
-
-
-    graph = the graph to be partitioned
-    tree = a chosen spanning tree on the graph
-    num_blocks = number of blocks in the partitions returned
-    
-    find the edge_list from the edges of tree so that the resulting partition
-    minimizes the differences in size between the blocks
-    
-    '''
-    if num_blocks > 2:
-        print("you haven't made this work for blocks > 2")
-        return None
-    list_of_edges = list(tree.edges())
-    best = 0
-    candidate = 0
-    for e in list_of_edges:
-        score = equi_score_tree_edge_pair(G,T,e)
-        if score > best:
-            best = score
-            candidate = e
-    return [candidate, best]
+import networkx as nx
 
 def equi_score_tree_edge_pair(G,T,e):
     T.remove_edges_from([e])
@@ -102,56 +15,144 @@ def equi_score_tree_edge_pair(G,T,e):
     T.add_edges_from([e])
     A = len(components[0])
     B = len(components[1])
-    x =  np.min([A / (A + B), B / (A + B)])
+    x =  min([A / (A + B), B / (A + B)])
     return x
 
-def random_equi_partition_trees(graph, k_part, number = 100):
-    equi_partitions = [] 
-    counter = 0
-    while len(equi_partitions) < number:
-        counter += 1
-        T = random_spanning_tree(graph)
-        e = equi_partition(T, k_part)
-        if e != False:
-            print(len(equi_partitions), "waiting time:", counter)
-            equi_partitions.append( R(graph, T, e) )
-            counter = 0
-    return equi_partitions
-    
-def equi_partition(T, num_blocks):
-    #Returns the partition if T can give an equi partition in num_blocks,
-    #Else return false
-    
-    #Currently this is hard coded for 4 partitions -- but there shold be a good
-    #and scalable algorithm
-    if num_blocks == 4:
-        e = equi_split(T)
-        if e == False:
-            return False
-        if e != False:
-            T.remove_edges_from([e])
-            components = list(nx.connected_component_subgraphs(T))
-            T.add_edges_from([e])
-            e1 = equi_split(components[0])
-            if e1 == False:
-                return False
-            e2 = equi_split(components[1])
-            if e2 == False:
-                return False
-    else:
-        print("you didn't set up functionality for more than 4 partitions yet!")
-    return [e, e1, e2]
+def almost_equi_split(tree):
+    # Returns the partition if T can be split evenly in two
+    # Else returns False
+    label_weights(tree)
+    edge, weight = choose_best_weight(tree)
 
-def equi_split(T):
-    #Returns the partition if T can be split evenly in two
-    #Else returns False
-    T_edges = T.edges()
-    for e in T_edges:
-        T.remove_edges_from([e])
-        components = list(nx.connected_components(T))
-        T.add_edges_from([e])
-        A = len(components[0])
-        B = len(components[1])
-        if A == B:
-            return e
+    if weight == len(tree) // 2:
+        return edge
+
     return False
+
+def equi_split(tree, num_blocks):
+    '''This will return a perfect equi-partition into num_blocks blocks
+    It will do so by running choose best weight_hard to peel off pieces of 
+    appropriate size
+    
+    :tree:
+    :num_blocks:
+    '''
+    label_weights(tree)
+    found_edges = []
+    found_blocks = 0
+    while found_blocks < num_blocks - 1:
+        edge = choose_best_weight_hard(tree, num_blocks)
+        if edge != None:
+            found_edges.append(edge)
+            found_blocks += 1
+            update_weights(tree, edge)
+        if edge == None:
+            return None
+    return found_edges
+        
+#tree = random_spanning_tree(graph)
+#label_weights(tree)
+#test_tree(tree)      
+
+def update_weights(tree, edge):
+    '''update the weights of a graph after selecting an edge to cut
+    this will set the weights above the edge to zero
+    and below the edge will get decremented by 1
+    '''
+    
+    head_node = edge[1]
+    tail_node = edge[0]
+    weight = tree.nodes[head_node]["weight"] 
+    set_label_zero_above(tree, head_node)
+    decrement_label_weights_below(tree, tail_node, weight)
+    
+def set_label_zero_above(tree, node):
+    '''sets the label weights to zero at and above the passed node
+    '''
+    
+    in_edges = tree.in_edges(node)
+    tree.nodes[node]["weight"] = 0
+    for edge in in_edges:
+        set_label_zero_above(tree, edge[0])
+        
+def test_tree(tree):
+
+    labels = nx.get_node_attributes(tree, "weight")
+    nx.draw_spring(tree, labels= labels)
+    
+#graph = nx.grid_graph([5,5])
+#tree = random_spanning_tree(graph)
+#label_weights(tree) 
+def decrement_label_weights_below(tree, node, weight):
+    '''lowers the label weights by weight at and below the passed node
+    '''
+    out_edges = list(tree.out_edges(node))
+
+    tree.nodes[node]["weight"] += -1 * weight
+    if not out_edges:
+        return
+    out_edges = out_edges[0]
+    decrement_label_weights_below(tree, out_edges[1], weight)
+
+def label_weights(tree):
+    """Label nodes of of a directed, rooted tree by their weights.
+
+    :tree: NetworkX DiGraph.
+    :returns: Nothing.
+
+    The "weight" of a node is the size of the subtree rooted at itself.
+    
+    TODO: implement a priority queue of weights so that you don't need to search through the graph...
+
+    """
+    def _label_weights(node):
+        in_edges = tree.in_edges(node)
+
+        if not in_edges:
+            tree.nodes[node]["weight"] = 1
+            return 1
+
+        child_weights = [_label_weights(child) for child, _ in in_edges]
+
+        weight = sum(child_weights) + 1
+        tree.nodes[node]["weight"] = weight
+
+        return weight
+
+    root = [node for node in tree if tree.out_degree(node) == 0][0]
+    _label_weights(root)
+
+def choose_best_weight_hard(tree, num_blocks):
+    '''Returns an edge that cuts of a chunk of size n_nodes/ num_blocks
+    if it exists. Otherwise returns None.
+    
+    :graph:
+    :returns: edge
+    '''
+    size = len(tree.nodes()) / num_blocks
+    for node in tree:
+        if tree.nodes[node]["weight"] == size:
+            return list(tree.edges(node))[0]
+    return None
+
+def choose_best_weight(graph, num_blocks):
+    """Choose edge from graph with weight closest to n_nodes / num_blocks.
+
+    :graph: NetworkX Graph labeled by :func:`~label_weights`.
+    :returns: Tuple (edge, weight).
+
+    """
+
+    best_node = None
+    best_difference = float("inf")
+
+    for node in graph:
+        diff = abs(len(graph) / num_blocks - graph.nodes[node]["weight"])
+        if diff < best_difference:
+            best_node = node
+            best_difference = diff
+
+    edge = list(graph.edges(best_node))[0]
+    weight = graph.nodes[best_node]["weight"]
+
+    return (edge, weight)

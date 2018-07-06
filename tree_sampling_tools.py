@@ -28,13 +28,13 @@ def forward_tree(G,a):
             edges.append( [walk[t], walk[t-1]])
     return edges
 
-def random_spanning_tree(G):
+def random_spanning_tree(graph):
     #It's going to be faster to use the David Wilson algorithm here instead.
-    T_edges = forward_tree(G, random.choice(list(G.nodes())))
-    T = nx.DiGraph()
-    T.add_nodes_from(list(G.nodes()))
-    T.add_edges_from(T_edges)
-    return T
+    tree_edges = forward_tree(graph, random.choice(list(graph.nodes())))
+    tree = nx.DiGraph()
+    tree.add_nodes_from(list(graph.nodes()))
+    tree.add_edges_from(tree_edges)
+    return tree
 
 def random_spanning_tree_wilson(G):
     #The David Wilson random spanning tree algorithm
