@@ -8,8 +8,8 @@ Created on Wed Jul  4 11:44:50 2018
 from equi_partition_tools import equi_split
 import itertools
 import networkx as nx
-from tree_sampling_tools import random_spanning_tree
 import random
+
 ######Projection tools:
     
 '''use exercise 2 on dual graph and trees for isospannimetric 
@@ -82,41 +82,41 @@ def partition_spectrum_sample(graph,tree,num_blocks,sample_size):
     return partitions
 
 
-def random_lift(graph, subgraphs):
-    '''
-    
-    '''
-    print("You haven't fixed this to be directed...")
-    number_of_parts = len(subgraphs)
-    subgraph_trees = [random_spanning_tree(g) for g in subgraphs]
-    
-    #This builds a graph with nodes the subgraph, and they are connected
-    #if there is an edge connecting the two subgraphs
-    #and each edge gets 'choices' = to all the edges in G that connect the two subgraphs
-    connector_graph = nx.Graph()
-    connector_graph.add_nodes_from(subgraphs)
-    for subgraph_1 in subgraphs:
-        for subgraph_2 in subgraphs:
-            if subgraph_1 != subgraph_2:
-                cutedges = cut_edges(graph, subgraph_1, subgraph_2)
-                if cutedges != []:
-                    connector_graph.add_edge(subgraph_1, subgraph_2, choices = cutedges)
-                    #need to worry about directendess!!???
-                    
-                    
-    connector_meta_tree = random_spanning_tree(connector_graph)
-    connector_tree = nx.Graph()
-    for e in connector_meta_tree.edges():
-        w = random.choice(connector_graph[e[0]][e[1]]['choices'])
-        connector_tree.add_edges_from([w])
-        
-    
-    tree = nx.Graph()
-    for sub_tree in subgraph_trees:
-        tree.add_edges_from(sub_tree.edges())
-    tree.add_edges_from(connector_tree.edges())
-    edge_list = random.sample(list(T.edges()),number_of_parts - 1)
-    return [tree, edge_list]
+#def random_lift(graph, subgraphs):
+#    '''
+#    
+#    '''
+#    print("You haven't fixed this to be directed...")
+#    number_of_parts = len(subgraphs)
+#    subgraph_trees = [random_spanning_tree(g) for g in subgraphs]
+#    
+#    #This builds a graph with nodes the subgraph, and they are connected
+#    #if there is an edge connecting the two subgraphs
+#    #and each edge gets 'choices' = to all the edges in G that connect the two subgraphs
+#    connector_graph = nx.Graph()
+#    connector_graph.add_nodes_from(subgraphs)
+#    for subgraph_1 in subgraphs:
+#        for subgraph_2 in subgraphs:
+#            if subgraph_1 != subgraph_2:
+#                cutedges = cut_edges(graph, subgraph_1, subgraph_2)
+#                if cutedges != []:
+#                    connector_graph.add_edge(subgraph_1, subgraph_2, choices = cutedges)
+#                    #need to worry about directendess!!???
+#                    
+#                    
+#    connector_meta_tree = random_spanning_tree(connector_graph)
+#    connector_tree = nx.Graph()
+#    for e in connector_meta_tree.edges():
+#        w = random.choice(connector_graph[e[0]][e[1]]['choices'])
+#        connector_tree.add_edges_from([w])
+#        
+#    
+#    tree = nx.Graph()
+#    for sub_tree in subgraph_trees:
+#        tree.add_edges_from(sub_tree.edges())
+#    tree.add_edges_from(connector_tree.edges())
+#    edge_list = random.sample(list(T.edges()),number_of_parts - 1)
+#    return [tree, edge_list]
 
 #####For lifting:
 

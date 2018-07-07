@@ -10,6 +10,7 @@ import networkx as nx
 import random
 from equi_partition_tools import equi_split
 from projection_tools import remove_edges_map
+
 def simple_random_walk(graph,node):
     '''takes'''
     wet = set([node])

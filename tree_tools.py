@@ -18,8 +18,7 @@ import scipy.linalg
 from scipy.sparse import csc_matrix
 import scipy
 from scipy import array, linalg, dot
-from equi_partition_tools import equi_split
-import projection_tools
+from projection_tools import remove_edges_map
 
 ######Tree counting
 
@@ -75,7 +74,7 @@ def likelihood_tree_edges_pair(graph,tree,edge_list):
     TODO -- rewrite score to be 1 / this
     
     '''
-    partition = projection_tools.remove_edges_map(graph, tree, edge_list)
+    partition = remove_edges_map(graph, tree, edge_list)
     #this gets the list of subgraphs from (tree, edges) pair
     tree_term = np.sum([log_number_trees(g) for g in partition])
 

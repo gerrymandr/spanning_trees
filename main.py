@@ -7,17 +7,28 @@ Created on Fri Jul  6 17:32:53 2018
 
 from walk_tools import equi_shadow_walk
 import networkx as nx
-from tree_sampling_tools import random_spanning_tree, random_equi_partitions
+from tree_sampling_tools import random_equi_partitions, random_spanning_tree
 
 def explore_random(graph_size, num_blocks):
     graph = nx.grid_graph([graph_size, graph_size])
     tree_partitions = random_equi_partitions(graph, 20, num_blocks)
     return tree_partitions
+
 def explore_walk(graph_size, num_blocks):
     graph = nx.grid_graph([graph_size, graph_size])
     tree = random_spanning_tree(graph)
-    tree_partitions =  equi_shadow_walk(graph, tree,  20, num_blocks)
+    tree_partitions =  equi_shadow_walk(graph, tree,  5, num_blocks)
     return tree_partitions
+
+
+explore_random(20,4)
+
+
+'''
+Todo: intead of hard equi partitions, expand it to delta equi... and 
+get all delta equi partitions... is this going to slow down the check step?
+
+'''
 
 ############Old tests:
 #
