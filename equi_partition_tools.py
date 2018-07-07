@@ -62,7 +62,7 @@ def update_weights(tree, edge):
     
     head_node = edge[1]
     tail_node = edge[0]
-    weight = tree.nodes[head_node]["weight"] 
+    weight = tree.nodes[tail_node]["weight"] 
     set_label_zero_above(tree, tail_node)
     decrement_label_weights_below(tree, head_node, weight)
     
