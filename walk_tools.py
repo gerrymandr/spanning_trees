@@ -63,8 +63,7 @@ def equi_shadow_walk(graph, tree, num_steps, num_blocks):
     counter = 0
     while len(found_partitions) < num_steps:
         counter += 1
-        tree = equi_shadow_step(graph, tree, num_blocks)
-        edge_list = equi_split(tree, num_blocks)
+        tree, edge_list = equi_shadow_step(graph, tree, num_blocks)
         if edge_list != None:
             found_partitions.append( remove_edges_map(graph, tree, edge_list))
             print(len(found_partitions), "waiting time:", counter)

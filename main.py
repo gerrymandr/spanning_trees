@@ -8,20 +8,31 @@ Created on Fri Jul  6 17:32:53 2018
 from walk_tools import equi_shadow_walk
 import networkx as nx
 from tree_sampling_tools import random_equi_partitions, random_spanning_tree
+from visualization_tools import visualize_partition
 
-def explore_random(graph_size, num_blocks):
+def explore_random(graph_size, num_maps, num_blocks, pictures = False):
+    '''This samples random equi-partitoins'''
     graph = nx.grid_graph([graph_size, graph_size])
-    tree_partitions = random_equi_partitions(graph, 20, num_blocks)
+    tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
+    if pictures == True:
+        for partition in tree_partitions:
+            visualize_partition(graph, partition)
     return tree_partitions
 
+
 def explore_walk(graph_size, num_blocks):
+    '''
+    This does tree walk to sample equi-partitions
+    '''
     graph = nx.grid_graph([graph_size, graph_size])
     tree = random_spanning_tree(graph)
     tree_partitions =  equi_shadow_walk(graph, tree,  3, num_blocks)
     return tree_partitions
 
 
-explore_random(24,4)
+    
+#explore_random(16,4)
+#explore_walk(8,4)
 
 
 '''
