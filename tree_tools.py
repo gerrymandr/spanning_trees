@@ -91,7 +91,7 @@ def likelihood_tree_edges_pair(graph,tree,edge_list):
     return (tree_term + cut_weight)
 
 
-def effective_resistance(G, vertex_a, vertex_2, LU = 0):
+def effective_resistance(graph, vertex_1, vertex_2, LU = 0):
     #Can pass LU decomposition...
     
     return None

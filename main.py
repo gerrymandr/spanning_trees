@@ -17,11 +17,11 @@ def explore_random(graph_size, num_blocks):
 def explore_walk(graph_size, num_blocks):
     graph = nx.grid_graph([graph_size, graph_size])
     tree = random_spanning_tree(graph)
-    tree_partitions =  equi_shadow_walk(graph, tree,  5, num_blocks)
+    tree_partitions =  equi_shadow_walk(graph, tree,  3, num_blocks)
     return tree_partitions
 
 
-explore_random(20,4)
+explore_random(24,4)
 
 
 '''
