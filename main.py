@@ -5,15 +5,12 @@ Created on Fri Jul  6 17:32:53 2018
 @author: MGGG
 """
 
-   
+from walk_tools import equi_shadow_walk
+
 def test(grid_size, k_part, steps = 100, equi = False, MH = True):
-    from naive_graph_partitions import k_connected_graph_partitions
-    #k_part = 3 nnum partitions
-    G = nx.grid_graph(grid_size)
-    A = list(k_connected_graph_partitions(G, k_part))
-    
+
     ##Tree walks:
-    T = random_spanning_tree(G)
+    tree = random_spanning_tree(graphs)
     e = list(T.edges())[0:k_part - 1]
     visited_partitions = []
     for i in range(steps):

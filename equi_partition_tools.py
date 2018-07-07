@@ -63,8 +63,8 @@ def update_weights(tree, edge):
     head_node = edge[1]
     tail_node = edge[0]
     weight = tree.nodes[head_node]["weight"] 
-    set_label_zero_above(tree, head_node)
-    decrement_label_weights_below(tree, tail_node, weight)
+    set_label_zero_above(tree, tail_node)
+    decrement_label_weights_below(tree, head_node, weight)
     
 def set_label_zero_above(tree, node):
     '''sets the label weights to zero at and above the passed node

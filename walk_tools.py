@@ -36,7 +36,8 @@ def propose_step(graph,tree):
     new_tree.add_edges_from(list(tree.edges()))
     new_tree.remove_edges_from([w])
     tree.remove_edges_from([e])
-    return new_tree
+    
+    return nx.dfs_tree(new_tree, list(new_tree.nodes())[0]).reverse()
 
 
 def equi_shadow_walk(graph, tree, num_blocks):
@@ -52,7 +53,6 @@ def equi_shadow_walk(graph, tree, num_blocks):
     while True:
         new_tree = propose_step(graph, tree)
         edges = equi_split(new_tree, num_blocks)
-        print(equi_score_tree_edge_pair(graph, new_tree, edges[0]))
         if edges != None:
             return (new_tree, edges)
         
