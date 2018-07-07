@@ -8,24 +8,26 @@ Created on Wed Jul  4 11:43:31 2018
 #####For creating a spanning tree
 import networkx as nx
 import random
-def srw(G,a):
+from equi_partition_tools import equi_split
+from projection_tools import remove_edges_map
+def simple_random_walk(graph,node):
     '''takes'''
-    wet = set([a])
-    trip = [a]
-    while len(wet) < len(G.nodes()):
-        b = random.choice(list(G.neighbors(a)))
-        wet.add(b)
-        trip.append(b)
-        a = b
+    wet = set([node])
+    trip = [node]
+    while len(wet) < len(graph.nodes()):
+        next_step = random.choice(list(graph.neighbors(node)))
+        wet.add(next_step)
+        trip.append(next_step)
+        node = next_step
     return trip
 
-def forward_tree(G,a):
-    walk = srw(G,a)
+def forward_tree(graph,node):
+    walk = simple_random_walk(graph, node)
     edges = []
-    for x in G.nodes():
-        if (x != walk[0]):
-            t = walk.index(x)
-            edges.append( [walk[t], walk[t-1]])
+    for vertex in graph.nodes():
+        if (vertex != walk[0]):
+            first_occurance = walk.index(vertex)
+            edges.append( [walk[first_occurance], walk[first_occurance-1]])
     return edges
 
 def random_spanning_tree(graph):
@@ -36,7 +38,20 @@ def random_spanning_tree(graph):
     tree.add_edges_from(tree_edges)
     return tree
 
-def random_spanning_tree_wilson(G):
+def random_spanning_tree_wilson(graph):
     #The David Wilson random spanning tree algorithm
-    
-    return T
+    tree = 0
+    return tree
+
+def random_equi_partitions(graph, num_partitions, num_blocks):
+    found_partitions = []
+    counter = 0
+    while len(found_partitions) < num_partitions:
+        counter += 1
+        tree = random_spanning_tree(graph)
+        edge_list = equi_split(tree, num_blocks)
+        if edge_list != None:
+            found_partitions.append( remove_edges_map(graph, tree, edge_list))
+            print(len(found_partitions), "waiting time:", counter)
+            counter = 0
+    return found_partitions

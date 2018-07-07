@@ -10,7 +10,6 @@ import itertools
 import networkx as nx
 from tree_sampling_tools import random_spanning_tree
 import random
-from tree_tools import cut_edges
 ######Projection tools:
     
 '''use exercise 2 on dual graph and trees for isospannimetric 
@@ -31,7 +30,7 @@ def remove_edges_map(graph,tree,edge_list):
 
     '''
     tree.remove_edges_from(edge_list)
-    components = list(nx.connected_components(tree))
+    components = list(nx.connected_components(tree.to_undirected()))
     tree.add_edges_from(edge_list)
     subgraphs = [nx.induced_subgraph(graph, subtree) for subtree in components]
     #This is expensive - TODO in case of error
@@ -87,7 +86,7 @@ def random_lift(graph, subgraphs):
     '''
     
     '''
-    print("You haven't fixed this to be directed...)
+    print("You haven't fixed this to be directed...")
     number_of_parts = len(subgraphs)
     subgraph_trees = [random_spanning_tree(g) for g in subgraphs]
     
@@ -118,3 +117,25 @@ def random_lift(graph, subgraphs):
     tree.add_edges_from(connector_tree.edges())
     edge_list = random.sample(list(T.edges()),number_of_parts - 1)
     return [tree, edge_list]
+
+#####For lifting:
+
+def cut_edges(graph, subgraph_1, subgraph_2):
+    '''Finds the edges in graph from 
+    subgraph_1 to subgraph_2
+    
+    :graph: The ambient graph
+    :subgraph_1: 
+    :subgraph_2:
+        
+
+    '''
+    edges_of_graph = list(graph.edges())
+
+    list_of_cut_edges = []
+    for e in edges_of_graph:
+        if e[0] in subgraph_1 and e[1] in subgraph_2:
+            list_of_cut_edges.append(e)
+        if e[0] in subgraph_2 and e[1] in subgraph_1:
+            list_of_cut_edges.append(e)
+    return list_of_cut_edges

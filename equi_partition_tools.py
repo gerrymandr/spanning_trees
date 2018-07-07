@@ -34,6 +34,9 @@ def equi_split(tree, num_blocks):
     It will do so by running choose best weight_hard to peel off pieces of 
     appropriate size
     
+    this works because it is returning the edges, handling the components is done
+    later...
+    
     :tree:
     :num_blocks:
     '''

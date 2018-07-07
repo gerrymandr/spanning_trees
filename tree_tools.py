@@ -98,27 +98,7 @@ def effective_resistance(G, vertex_a, vertex_2, LU = 0):
     return None
     
 
-#####For lifting:
 
-def cut_edges(graph, subgraph_1, subgraph_2):
-    '''Finds the edges in graph from 
-    subgraph_1 to subgraph_2
-    
-    :graph: The ambient graph
-    :subgraph_1: 
-    :subgraph_2:
-        
-
-    '''
-    edges_of_graph = list(graph.edges())
-
-    list_of_cut_edges = []
-    for e in edges_of_graph:
-        if e[0] in subgraph_1 and e[1] in subgraph_2:
-            list_of_cut_edges.append(e)
-        if e[0] in subgraph_2 and e[1] in subgraph_1:
-            list_of_cut_edges.append(e)
-    return list_of_cut_edges
    
        
 ###Emperical distribution creation tools
@@ -146,5 +126,11 @@ def make_histogram(A, visited_partitions):
         dictionary[str(x)] = count(x,visited_partitions) / len(visited_partitions)
     return dictionary
 
+
+def total_variation(distribution_1, distribution_2):
+    total_variation = 0
+    for k in distribution_1.keys():
+        total_variation += np.abs(distribution_1[k] - distribution_2[k])
+    return total_variation
 ##########################
  

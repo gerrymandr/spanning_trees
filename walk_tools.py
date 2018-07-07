@@ -7,6 +7,8 @@ Created on Fri Jul  6 17:28:34 2018
 from equi_partition_tools import equi_split, equi_score_tree_edge_pair
 import random
 import networkx as nx
+from tree_sampling_tools import random_spanning_tree
+from projection_tools import remove_edges_map
 ###Tree walk
     
 def propose_step(graph,tree):
@@ -40,7 +42,7 @@ def propose_step(graph,tree):
     return nx.dfs_tree(new_tree, list(new_tree.nodes())[0]).reverse()
 
 
-def equi_shadow_walk(graph, tree, num_blocks):
+def equi_shadow_step(graph, tree, num_blocks):
     '''
     Keeps walking on trees from current tree until it reaches a new tree that 
     has an equipartition
@@ -55,6 +57,19 @@ def equi_shadow_walk(graph, tree, num_blocks):
         edges = equi_split(new_tree, num_blocks)
         if edges != None:
             return (new_tree, edges)
+        
+def equi_shadow_walk(graph, tree, num_steps, num_blocks):
+    found_partitions = []
+    counter = 0
+    while len(found_partitions) < num_steps:
+        counter += 1
+        tree = equi_shadow_step(graph, tree, num_blocks)
+        edge_list = equi_split(tree, num_blocks)
+        if edge_list != None:
+            found_partitions.append( remove_edges_map(graph, tree, edge_list))
+            print(len(found_partitions), "waiting time:", counter)
+            counter = 0
+    return found_partitions
         
 def test():
     graph = nx.grid_graph([10,10])
