@@ -18,7 +18,7 @@ def visualize_partition(graph, partition):
     color_map = {i : i for i in range(100)}
     node_colors = [color_map[graph.nodes[vertex]["district"] ] for vertex in graph.nodes()]
     edge_colors = [graph.edges[edge]["tree"] for edge in graph.edges()]
-    nx.draw(graph, pos=nx.get_node_attributes(graph, 'pos'), cmap=plt.get_cmap('jet'), node_color=node_colors, edge_color=edge_colors)
+    nx.draw(graph, pos=nx.get_node_attributes(graph, 'pos'), cmap=plt.get_cmap('jet'), node_color=node_colors, edge_color=edge_colors, node_size = 10)
     plt.show()
     
 def visualize_partition_and_tree(graph, partitoin, tree):
