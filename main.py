@@ -23,6 +23,9 @@ def explore_random( graph_size, num_maps, num_blocks, pictures = False, divide_a
         graph = nx.grid_graph([graph_size, graph_size])
     if graph_type == "triangle":
         graph = nx.triangular_lattice_graph(graph_size, graph_size)
+#    if graph_type == "dodeca":
+#        graph = nx.dodecahedral_graph()
+        
     if equi == True:
         if divide_and_conquer == False:
             tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
@@ -64,10 +67,11 @@ def explore_walk(graph_size, num_blocks):
 #Wilson is more than 10 times faster for larger graphs...
 #    
 
-parts = explore_random(120,1,8, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
-check_delta_equi_split([len(x) for x in parts[0]], .01)
+#parts = explore_random(120,1,8, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
+#check_delta_equi_split([len(x) for x in parts[0]], .01)
 #explore_walk(8,4)
-
+#
+#parts = explore_random(10,1,3, pictures = True, divide_and_conquer = False, equi = False, graph_type = "dodeca")
 
 '''
 Todo: intead of hard equi partitions, expand it to delta equi... and 
