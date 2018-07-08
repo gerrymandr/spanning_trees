@@ -118,16 +118,16 @@ def random_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilso
             counter = 0
     return found_partitions
 
-def random_equi_partition_fast(graph, log2_num_blocks):
-    found_partitions = []
-    if log2_num_blocks == 1:
-        found_partitions = random_equi_partitions(graph, 1, 2)[0]
-    if log2_num_blocks > 1: 
-        parts = random_equi_partitions(graph, 1, 2)[0]
-        for subgraph in parts:    
-            found_partitions += random_equi_partition_fast(subgraph, log2_num_blocks - 1)
-    
-    return found_partitions
+#def random_equi_partition_fast(graph, log2_num_blocks):
+#    found_partitions = []
+#    if log2_num_blocks == 1:
+#        found_partitions = random_equi_partitions(graph, 1, 2)[0]
+#    if log2_num_blocks > 1: 
+#        parts = random_equi_partitions(graph, 1, 2)[0]
+#        for subgraph in parts:    
+#            found_partitions += random_equi_partition_fast(subgraph, log2_num_blocks - 1)
+#    
+#    return found_partitions
 
 def random_equi_partition_fast_nonrecursive(graph, log2_num_blocks):
     blocks = random_equi_partitions(graph, 1, 2)[0]
