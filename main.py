@@ -7,7 +7,7 @@ Created on Fri Jul  6 17:32:53 2018
 
 from walk_tools import equi_shadow_walk
 import networkx as nx
-from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson
+from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson, random_equi_partitions_fast
 from visualization_tools import visualize_partition
 
 def explore_random(graph_size, num_maps, num_blocks, pictures = False):
@@ -19,6 +19,13 @@ def explore_random(graph_size, num_maps, num_blocks, pictures = False):
             visualize_partition(graph, partition)
     return tree_partitions
 
+def explore_random_fast(graph_size, num_maps, log2_num_blocks, pictures = False):
+    graph = nx.grid_graph([graph_size, graph_size])
+    tree_partitions = random_equi_partitions_fast(graph, num_maps, log2_num_blocks)
+    if pictures == True:
+        for partition in tree_partitions:
+            visualize_partition(graph, partition)
+    return tree_partitions
 
 def explore_walk(graph_size, num_blocks):
     '''
@@ -29,12 +36,13 @@ def explore_walk(graph_size, num_blocks):
     tree_partitions =  equi_shadow_walk(graph, tree,  3, num_blocks)
     return tree_partitions
 
-graph = nx.grid_graph( [100,100])
-tree = random_spanning_tree_wilson(graph)
+#graph = nx.grid_graph( [100,100])
+#tree = random_spanning_tree_wilson(graph)
 #tree = random_spanning_tree(graph)
 #Wilson is more than 10 times faster for larger graphs...
-    
-explore_random(16,1,8, pictures = True)
+#    
+
+explore_random_fast(80,1,3, pictures = True)
 #explore_walk(8,4)
 
 

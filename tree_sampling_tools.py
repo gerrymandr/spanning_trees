@@ -95,6 +95,8 @@ def loop_erasure(trip):
     
 
 #################3
+    
+
 
 def random_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilson"):
     found_partitions = []
@@ -111,3 +113,30 @@ def random_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilso
             print(len(found_partitions), "waiting time:", counter)
             counter = 0
     return found_partitions
+
+def random_equi_partition_fast(graph, log2_num_blocks):
+    found_partitions = []
+    if log2_num_blocks == 1:
+        found_partitions = random_equi_partitions(graph, 1, 2)[0]
+    if log2_num_blocks > 1: 
+        parts = random_equi_partitions(graph, 1, 2)[0]
+        for subgraph in parts:    
+            found_partitions += random_equi_partition_fast(subgraph, log2_num_blocks - 1)
+    
+    return found_partitions
+
+def random_equi_partition_fast_nonrecursive(graph, log2_num_blocks):
+    blocks = random_equi_partitions(graph, 1, 2)[0]
+    while len(blocks) < 2**log2_num_blocks:
+        subgraph_splits = []
+        for subgraph in blocks:
+            subgraph_splits += random_equi_partitions(subgraph, 1, 2)[0]
+        blocks = subgraph_splits
+    return blocks
+
+def random_equi_partitions_fast(graph, num_partitions, log2_num_blocks):
+    found_partitions = []
+    while len(found_partitions) < num_partitions:
+        found_partitions.append(random_equi_partition_fast_nonrecursive(graph, log2_num_blocks))
+    return found_partitions
+
