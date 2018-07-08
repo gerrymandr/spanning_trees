@@ -48,15 +48,18 @@ def random_spanning_tree_wilson(graph):
     tree_edges = []
     hitting_set = set ( [ random.choice(list(graph.nodes()))])
     while len(hitting_set) < len(graph):
-        start_node = random.choice([ v for v in graph.nodes() if v not in hitting_set])
+        allowable_set = list(set(graph.nodes()).difference(hitting_set))
+        start_node = random.choice(allowable_set)
         trip = random_walk_until_hit(graph, start_node, hitting_set)
         new_branch = loop_erasure(trip)
         for i in range(len(new_branch) - 1):
             tree_edges.append( [ new_branch[i], new_branch[i + 1]])
-        for v in trip:
+        for v in new_branch:
             hitting_set.add(v)
     tree = nx.DiGraph()
+    tree.add_nodes_from(list(graph.nodes()))
     tree.add_edges_from(tree_edges)
+    
     return tree
 
 def random_walk_until_hit(graph, start_node, hitting_set):
@@ -101,7 +104,7 @@ def random_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilso
         if algorithm == "Broder":
             tree = random_spanning_tree(graph)
         if algorithm == "Wilson":
-            tree = random_spanning_tree(graph)
+            tree = random_spanning_tree_wilson(graph)
         edge_list = equi_split(tree, num_blocks)
         if edge_list != None:
             found_partitions.append( remove_edges_map(graph, tree, edge_list))
