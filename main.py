@@ -11,7 +11,7 @@ from tree_sampling_tools import random_equi_partitions, random_spanning_tree, ra
 from equi_partition_tools import check_delta_equi_split
 from visualization_tools import visualize_partition
 import numpy as np
-def explore_random(graph_size, num_maps, num_blocks, pictures = False, divide_and_conquer = False, equi = False):
+def explore_random(graph_size, num_maps, num_blocks, pictures = False, divide_and_conquer = False, equi = False, delta = .1):
     '''This samples random equi-partitoins according to natural likelihood
     
     :fast: The divide and conquer strategy. Currently unclear what distirbution this gives.
@@ -31,7 +31,7 @@ def explore_random(graph_size, num_maps, num_blocks, pictures = False, divide_an
             tree_partitions = random_equi_partitions_fast(graph, num_maps, log2_num_blocks)
     if equi == False:
         if divide_and_conquer == False:
-            tree_partitions = random_almost_equi_partitions(graph, num_maps, num_blocks)
+            tree_partitions = random_almost_equi_partitions(graph, num_maps, num_blocks, delta)
         if divide_and_conquer == True:
             log2_num_blocks = np.log2(num_blocks)
             if int(log2_num_blocks) != log2_num_blocks:
@@ -42,6 +42,7 @@ def explore_random(graph_size, num_maps, num_blocks, pictures = False, divide_an
         for partition in tree_partitions:
             visualize_partition(graph, partition)
             print([len(x) for x in partition])
+            
     return tree_partitions
 
 
@@ -60,7 +61,8 @@ def explore_walk(graph_size, num_blocks):
 #Wilson is more than 10 times faster for larger graphs...
 #    
 
-explore_random(100,1,8, pictures = True, divide_and_conquer = False)
+parts = explore_random(120,1,8, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
+check_delta_equi_split([len(x) for x in parts[0]], .01)
 #explore_walk(8,4)
 
 

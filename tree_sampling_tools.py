@@ -8,7 +8,7 @@ Created on Wed Jul  4 11:43:31 2018
 #####For creating a spanning tree
 import networkx as nx
 import random
-from equi_partition_tools import equi_split, almost_equi_split
+from equi_partition_tools import equi_split, almost_equi_split, check_delta_equi_split
 from projection_tools import remove_edges_map
 
 def simple_random_walk(graph,node):
@@ -148,24 +148,22 @@ def random_equi_partitions_fast(graph, num_partitions, log2_num_blocks):
 ############ Almost equi-partitions:
 
 
-def random_almost_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilson"):
+def random_almost_equi_partitions(graph, num_partitions, num_blocks, delta):
     found_partitions = []
     counter = 0
     while len(found_partitions) < num_partitions:
         counter += 1
-        if algorithm == "Broder":
-            tree = random_spanning_tree(graph)
-        if algorithm == "Wilson":
-            tree = random_spanning_tree_wilson(graph)
-        edge_list = almost_equi_split(tree, num_blocks)
-        if edge_list != None:
-            found_partitions.append( remove_edges_map(graph, tree, edge_list))
+        tree = random_spanning_tree_wilson(graph)
+        edge_list = almost_equi_split(tree, num_blocks)   
+        blocks = remove_edges_map(graph, tree, edge_list)
+        if check_delta_equi_split([len(x) for x in blocks], delta):
+            found_partitions.append( blocks)
             print(len(found_partitions), "waiting time:", counter)
             counter = 0
     return found_partitions
 
 ##
-def random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks):
+def random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks, delta):
     blocks = random_equi_partitions(graph, 1, 2)[0]
     while len(blocks) < 2**log2_num_blocks:
         subgraph_splits = []
@@ -174,7 +172,8 @@ def random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks):
         blocks = subgraph_splits
     return blocks
 
-def random_almost_equi_partitions_fast(graph, num_partitions, log2_num_blocks):
+def random_almost_equi_partitions_fast(graph, num_partitions, log2_num_blocks, delta):
+    print("note: still need to addthe delta stuff ot this...")
     found_partitions = []
     while len(found_partitions) < num_partitions:
         found_partitions.append(random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks))
