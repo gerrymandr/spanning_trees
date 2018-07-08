@@ -20,6 +20,9 @@ import scipy
 from scipy import array, linalg, dot
 from projection_tools import remove_edges_map
 
+from networkx.algorithms.centrality.flow_matrix import *
+
+
 ######Tree counting
 
 def log_number_trees(graph, weight = False):
@@ -92,13 +95,18 @@ def likelihood_tree_edges_pair(graph,tree,edge_list):
 
 
 def effective_resistance(graph, vertex_1, vertex_2, LU = 0):
-    #Can pass LU decomposition...
-    
-    return None
+    for vertex in graph.nodes():
+            graph.nodes[vertex]["pos"] = vertex
+    n= 10
+    vertex_2 = 1
+    vertex_1 = 2
+    H = nx.relabel_nodes(graph, dict(zip(ordering, range(n))))
+    L = laplacian_sparse_matrix(H, format='csc')
+    solver = SuperLUInverseLaplacian(L, width=1) 
+    return solver.get_row(vertex_2)[vertex_1]
+
     
 
-
-   
        
 ###Emperical distribution creation tools
     

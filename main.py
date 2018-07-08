@@ -24,14 +24,14 @@ def explore_walk(graph_size, num_blocks):
     '''
     This does tree walk to sample equi-partitions
     '''
-    graph = nx.grid_graph([graph_size, graph_size])
+    graph = nx.grid_graph( [graph_size, graph_size])
     tree = random_spanning_tree(graph)
     tree_partitions =  equi_shadow_walk(graph, tree,  3, num_blocks)
     return tree_partitions
 
 
     
-#explore_random(16,4)
+explore_random(40,1,8, pictures = True)
 #explore_walk(8,4)
 
 
