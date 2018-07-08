@@ -18,16 +18,16 @@ def equi_score_tree_edge_pair(G,T,e):
     x =  min([A / (A + B), B / (A + B)])
     return x
 
-def almost_equi_split(tree):
-    # Returns the partition if T can be split evenly in two
-    # Else returns False
-    label_weights(tree)
-    edge, weight = choose_best_weight(tree)
-
-    if weight == len(tree) // 2:
-        return edge
-
-    return False
+#def almost_equi_split(tree):
+#    # Returns the partition if T can be split evenly in two
+#    # Else returns False
+#    label_weights(tree)
+#    edge, weight = choose_best_weight(tree)
+#
+#    if weight == len(tree) // 2:
+#        return edge
+#
+#    return False
 
 def equi_split(tree, num_blocks):
     '''This will return a perfect equi-partition into num_blocks blocks
@@ -52,7 +52,41 @@ def equi_split(tree, num_blocks):
         if edge == None:
             return None
     return found_edges
-        
+
+def almost_equi_split(tree, num_blocks):
+    '''This returns a ...
+    
+    Def: Let T be a spanning tree, and fix $\delta > 0$. If there is a subset of k edges E, so that removing the edges E from T gives components A_1, ... A_{k+1}, with |A_i| / |A_j| <= 1 + \delta for all $i$ and $j$, then say the $A_i$ are a $\delta$-equi partition, and $T$ is a k+1 delta-equi tree.
+    Chooses a random closest split for a tree...
+    '''
+    label_weights(tree)
+    #Idea, keep building it up until you get stuck (?) is that uniform?
+    #I think so...
+    found_edges = []
+    found_blocks = 0
+    while found_blocks < num_blocks - 1:
+        edge = choose_best_weight(tree, num_blocks)[0]
+        if edge != None:
+            found_edges.append(edge)
+            found_blocks += 1
+            update_weights(tree, edge)
+        if edge == None:
+            return None
+    return found_edges 
+
+def check_delta_equi_split(subgraph_sizes, delta = .01):
+    '''returns True if all ratios of sizes are all within 1 + delta
+    :subgraph_sizes: list of sizes
+    '''
+
+    for i in range(len(subgraph_sizes)):
+        for j in range(i, len(subgraph_sizes)):
+            if subgraph_sizes[i]/subgraph_sizes[j] > 1 + delta:
+                return False
+    return True
+
+
+
 #tree = random_spanning_tree(graph)
 #label_weights(tree)
 #test_tree(tree)      
@@ -138,7 +172,7 @@ def choose_best_weight_hard(tree, num_blocks):
             return list(tree.edges(node))[0]
     return None
 
-def choose_best_weight(graph, num_blocks):
+def choose_best_weight(tree, num_blocks):
     """Choose edge from graph with weight closest to n_nodes / num_blocks.
 
     :graph: NetworkX Graph labeled by :func:`~label_weights`.
@@ -149,13 +183,13 @@ def choose_best_weight(graph, num_blocks):
     best_node = None
     best_difference = float("inf")
 
-    for node in graph:
-        diff = abs(len(graph) / num_blocks - graph.nodes[node]["weight"])
+    for node in tree:
+        diff = abs(len(tree) / num_blocks - tree.nodes[node]["weight"])
         if diff < best_difference:
             best_node = node
             best_difference = diff
 
-    edge = list(graph.edges(best_node))[0]
-    weight = graph.nodes[best_node]["weight"]
+    edge = list(tree.edges(best_node))[0]
+    weight = tree.nodes[best_node]["weight"]
 
     return (edge, weight)

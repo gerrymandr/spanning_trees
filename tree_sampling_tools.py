@@ -8,7 +8,7 @@ Created on Wed Jul  4 11:43:31 2018
 #####For creating a spanning tree
 import networkx as nx
 import random
-from equi_partition_tools import equi_split
+from equi_partition_tools import equi_split, almost_equi_split
 from projection_tools import remove_edges_map
 
 def simple_random_walk(graph,node):
@@ -144,3 +144,38 @@ def random_equi_partitions_fast(graph, num_partitions, log2_num_blocks):
         found_partitions.append(random_equi_partition_fast_nonrecursive(graph, log2_num_blocks))
     return found_partitions
 
+
+############ Almost equi-partitions:
+
+
+def random_almost_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilson"):
+    found_partitions = []
+    counter = 0
+    while len(found_partitions) < num_partitions:
+        counter += 1
+        if algorithm == "Broder":
+            tree = random_spanning_tree(graph)
+        if algorithm == "Wilson":
+            tree = random_spanning_tree_wilson(graph)
+        edge_list = almost_equi_split(tree, num_blocks)
+        if edge_list != None:
+            found_partitions.append( remove_edges_map(graph, tree, edge_list))
+            print(len(found_partitions), "waiting time:", counter)
+            counter = 0
+    return found_partitions
+
+##
+def random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks):
+    blocks = random_equi_partitions(graph, 1, 2)[0]
+    while len(blocks) < 2**log2_num_blocks:
+        subgraph_splits = []
+        for subgraph in blocks:
+            subgraph_splits += random_almost_equi_partitions(subgraph, 1, 2)[0]
+        blocks = subgraph_splits
+    return blocks
+
+def random_almost_equi_partitions_fast(graph, num_partitions, log2_num_blocks):
+    found_partitions = []
+    while len(found_partitions) < num_partitions:
+        found_partitions.append(random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks))
+    return found_partitions

@@ -7,25 +7,43 @@ Created on Fri Jul  6 17:32:53 2018
 
 from walk_tools import equi_shadow_walk
 import networkx as nx
-from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson, random_equi_partitions_fast
+from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson, random_equi_partitions_fast, random_almost_equi_partitions_fast, random_almost_equi_partitions
+from equi_partition_tools import check_delta_equi_split
 from visualization_tools import visualize_partition
-
-def explore_random(graph_size, num_maps, num_blocks, pictures = False):
-    '''This samples random equi-partitoins'''
+import numpy as np
+def explore_random(graph_size, num_maps, num_blocks, pictures = False, divide_and_conquer = False, equi = False):
+    '''This samples random equi-partitoins according to natural likelihood
+    
+    :fast: The divide and conquer strategy. Currently unclear what distirbution this gives.
+    :pictures: whether to display pictures of the found plan
+    
+    
+    '''
     graph = nx.grid_graph([graph_size, graph_size])
-    tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
+    if equi == True:
+        if divide_and_conquer == False:
+            tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
+        if divide_and_conquer == True:
+            log2_num_blocks = np.log2(num_blocks)
+            if int(log2_num_blocks) != log2_num_blocks:
+                print("Must be power of 2 number of blocks")
+                return
+            tree_partitions = random_equi_partitions_fast(graph, num_maps, log2_num_blocks)
+    if equi == False:
+        if divide_and_conquer == False:
+            tree_partitions = random_almost_equi_partitions(graph, num_maps, num_blocks)
+        if divide_and_conquer == True:
+            log2_num_blocks = np.log2(num_blocks)
+            if int(log2_num_blocks) != log2_num_blocks:
+                print("Must be power of 2 number of blocks")
+                return
+            tree_partitions = random_almost_equi_partitions_fast(graph, num_maps, log2_num_blocks)
     if pictures == True:
         for partition in tree_partitions:
             visualize_partition(graph, partition)
+            print([len(x) for x in partition])
     return tree_partitions
 
-def explore_random_fast(graph_size, num_maps, log2_num_blocks, pictures = False):
-    graph = nx.grid_graph([graph_size, graph_size])
-    tree_partitions = random_equi_partitions_fast(graph, num_maps, log2_num_blocks)
-    if pictures == True:
-        for partition in tree_partitions:
-            visualize_partition(graph, partition)
-    return tree_partitions
 
 def explore_walk(graph_size, num_blocks):
     '''
@@ -42,13 +60,22 @@ def explore_walk(graph_size, num_blocks):
 #Wilson is more than 10 times faster for larger graphs...
 #    
 
-explore_random_fast(80,1,3, pictures = True)
+explore_random(100,1,8, pictures = True, divide_and_conquer = False)
 #explore_walk(8,4)
 
 
 '''
 Todo: intead of hard equi partitions, expand it to delta equi... and 
 get all delta equi partitions... is this going to slow down the check step?
+
+Add a score function -- 
+
+1. Draw a random tree
+2. Add node weights
+3. Draw random edges until you get one that lives within delta of ok (hard or soft...)
+4. Accept it.
+
+"Turtles on turtles..." but may work well.
 
 '''
 
