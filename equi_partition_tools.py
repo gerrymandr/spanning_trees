@@ -8,6 +8,7 @@ Created on Wed Jul  4 11:42:30 2018
 ''' Equipartition tools'''
 
 import networkx as nx
+import numpy as np
 
 def equi_score_tree_edge_pair(G,T,e):
     T.remove_edges_from([e])
@@ -103,62 +104,67 @@ def update_weights(tree, edge):
     set_label_zero_above(tree, tail_node)
     decrement_label_weights_below(tree, head_node, weight)
     
+    
+###TODO: Make these non-recursive also.
+    
 def set_label_zero_above(tree, node):
     '''sets the label weights to zero at and above the passed node
     '''
-    
-    in_edges = tree.in_edges(node)
+       
+    ordering = list(nx.topological_sort(tree))
     tree.nodes[node]["weight"] = 0
-    for edge in in_edges:
-        set_label_zero_above(tree, edge[0])
-        
+    for node in ordering[::-1]:
+        out_edge = list(tree.out_edges(node))
+        if out_edge != []:
+            if tree.nodes[out_edge[0][1]]["weight"] == 0:
+                tree.nodes[node]["weight"] = 0
+#            
+#def set_label_zero_above_recursive(tree, node):
+#    
+#    in_edges = tree.in_edges(node)
+#    tree.nodes[node]["weight"] = 0
+#    for edge in in_edges:
+#        set_label_zero_above_recursive(tree, edge[0])
+#        
 def test_tree(tree):
-
+    for vertex in tree:
+            tree.nodes[vertex]["pos"] = vertex
     labels = nx.get_node_attributes(tree, "weight")
-    nx.draw_spring(tree, labels= labels)
+    nx.draw(tree, pos=nx.get_node_attributes(tree, 'pos'), labels= labels)
     
 #graph = nx.grid_graph([5,5])
 #tree = random_spanning_tree(graph)
 #label_weights(tree) 
-def decrement_label_weights_below(tree, node, weight):
-    '''lowers the label weights by weight at and below the passed node
-    '''
-    out_edges = list(tree.out_edges(node))
-
+    
+    
+def decrement_label_weights_below(tree, start_node, weight):
+    
+    node = start_node
+    ordering = list(nx.topological_sort(tree))
+    for vertex in tree:
+        tree.nodes[vertex]["touched"] = 0
     tree.nodes[node]["weight"] += -1 * weight
-    if not out_edges:
-        return
-    out_edges = out_edges[0]
-    decrement_label_weights_below(tree, out_edges[1], weight)
+    tree.nodes[node]["touched"] = 1
+    for node in ordering:
+        in_edges = list(tree.in_edges(node))
+        if in_edges != []:
+            parents = [edge[0] for edge in in_edges]
+            for parent in parents:
+                if tree.nodes[parent]["touched"] == 1:
+                    tree.nodes[node]["weight"] += -1 * weight
+                    tree.nodes[node]["touched"] = 1
+       
+#def decrement_label_weights_below_recursive(tree, node, weight):
+#    '''lowers the label weights by weight at and below the passed node
+#    '''
+#    out_edges = list(tree.out_edges(node))
+#
+#    tree.nodes[node]["weight"] += -1 * weight
+#    if not out_edges:
+#        return
+#    out_edges = out_edges[0]
+#    decrement_label_weights_below_recursive(tree, out_edges[1], weight)
 
-def label_weights_recursive(tree):
-    """Label nodes of of a directed, rooted tree by their weights.
-
-    :tree: NetworkX DiGraph.
-    :returns: Nothing.
-
-    The "weight" of a node is the size of the subtree rooted at itself.
-    
-    TODO: implement a priority queue of weights so that you don't need to search through the graph...
-
-    """
-    def _label_weights(node):
-        in_edges = tree.in_edges(node)
-
-        if not in_edges:
-            tree.nodes[node]["weight"] = 1
-            return 1
-
-        child_weights = [_label_weights(child) for child, _ in in_edges]
-
-        weight = sum(child_weights) + 1
-        tree.nodes[node]["weight"] = weight
-
-        return weight
-
-    root = [node for node in tree if tree.out_degree(node) == 0][0]
-    _label_weights(root)
-    
 def label_weights(tree):
     '''
     Label nodes of of a directed, rooted tree by their weights.
@@ -211,8 +217,9 @@ def choose_best_weight(tree, num_blocks):
 
     best_node = None
     best_difference = float("inf")
-
-    for node in tree:
+    tree_nodes = np.sort(list(tree.nodes()))
+    for node in tree_nodes:
+        #DOes this in a random way?
         diff = abs(len(tree) / num_blocks - tree.nodes[node]["weight"])
         if diff < best_difference:
             best_node = node

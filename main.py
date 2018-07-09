@@ -67,7 +67,7 @@ def explore_walk(graph_size, num_blocks):
 #Wilson is more than 10 times faster for larger graphs...
 #    
 
-parts = explore_random(160,1,4, pictures = True, divide_and_conquer = True, equi = True, delta = .1)
+parts = explore_random(40,1,4, pictures = True, divide_and_conquer = True, equi = True, delta = .1)
 #parts = explore_random(120,1,12, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
 #check_delta_equi_split([len(x) for x in parts[0]], .01)
 #explore_walk(8,4)

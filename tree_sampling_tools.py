@@ -149,6 +149,9 @@ def random_equi_partitions_fast(graph, num_partitions, log2_num_blocks):
 
 
 def random_almost_equi_partitions(graph, num_partitions, num_blocks, delta):
+    '''This produces a delta almost equi partition
+    
+    '''
     found_partitions = []
     counter = 0
     while len(found_partitions) < num_partitions:
