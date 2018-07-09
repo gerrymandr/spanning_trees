@@ -17,7 +17,7 @@ because when you delete the super node... the number of edges you remove is equa
 to the perimeter...'''
     
 def remove_edges_map(graph,tree,edge_list):
-    '''Short description....
+    '''This is the map that produces a partition from a tree and a list of edges
     
     :graph: the graph to be partitioned
     :tree: a chosen spanning tree on the graph

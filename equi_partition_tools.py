@@ -131,7 +131,7 @@ def decrement_label_weights_below(tree, node, weight):
     out_edges = out_edges[0]
     decrement_label_weights_below(tree, out_edges[1], weight)
 
-def label_weights(tree):
+def label_weights_recursive(tree):
     """Label nodes of of a directed, rooted tree by their weights.
 
     :tree: NetworkX DiGraph.
@@ -158,6 +158,35 @@ def label_weights(tree):
 
     root = [node for node in tree if tree.out_degree(node) == 0][0]
     _label_weights(root)
+    
+def label_weights(tree):
+    '''
+    Label nodes of of a directed, rooted tree by their weights.
+#
+#    :tree: NetworkX DiGraph.
+#    :returns: Nothing.
+#
+#    The "weight" of a node is the size of the subtree rooted at itself.
+#    
+#    TODO: implement a priority queue of weights so that you don't need to search through the graph...
+    
+    This is the nonrecursive version, which makes pyhton not crash...
+    
+    '''
+
+    #This is a perfect problem for topological sorting!
+    
+    for node in tree.nodes:
+        tree.nodes[node]["weight"] = 1
+    
+    
+    ordering = nx.topological_sort(tree)
+    for node in ordering:
+        parents = [ edge[0] for edge in tree.in_edges(node)]
+        for parent in parents:
+            tree.nodes[node]["weight"] += tree.nodes[parent]["weight"]
+
+    
 
 def choose_best_weight_hard(tree, num_blocks):
     '''Returns an edge that cuts of a chunk of size n_nodes/ num_blocks
