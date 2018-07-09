@@ -9,6 +9,7 @@ Created on Wed Jul  4 11:42:30 2018
 
 import networkx as nx
 import numpy as np
+import random
 
 def equi_score_tree_edge_pair(G,T,e):
     T.remove_edges_from([e])
@@ -59,6 +60,8 @@ def almost_equi_split(tree, num_blocks):
     
     Def: Let T be a spanning tree, and fix $\delta > 0$. If there is a subset of k edges E, so that removing the edges E from T gives components A_1, ... A_{k+1}, with |A_i| / |A_j| <= 1 + \delta for all $i$ and $j$, then say the $A_i$ are a $\delta$-equi partition, and $T$ is a k+1 delta-equi tree.
     Chooses a random closest split for a tree...
+    
+    
     '''
     label_weights(tree)
     #Idea, keep building it up until you get stuck (?) is that uniform?
@@ -68,6 +71,11 @@ def almost_equi_split(tree, num_blocks):
     while found_blocks < num_blocks - 1:
         edge = choose_best_weight(tree, num_blocks)[0]
         if edge != None:
+            '''
+            
+            iF WEIGHT NOT GOOD, REJECT... ITS NOT NONE
+            
+            '''
             found_edges.append(edge)
             found_blocks += 1
             update_weights(tree, edge)
@@ -217,7 +225,8 @@ def choose_best_weight(tree, num_blocks):
 
     best_node = None
     best_difference = float("inf")
-    tree_nodes = np.sort(list(tree.nodes()))
+    tree_nodes = list(tree.nodes())
+    random.shuffle(tree_nodes)
     for node in tree_nodes:
         #DOes this in a random way?
         diff = abs(len(tree) / num_blocks - tree.nodes[node]["weight"])

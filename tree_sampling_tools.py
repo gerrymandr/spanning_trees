@@ -48,7 +48,9 @@ def random_spanning_tree_wilson(graph):
     tree_edges = []
     hitting_set = set ( [ random.choice(list(graph.nodes()))])
     allowable_set = set(graph.nodes())
-    while len(hitting_set) < len(graph):
+    len_graph = len(graph)
+    len_hitting_set = 1
+    while len_hitting_set < len_graph:
         #allowable_set = list(set(graph.nodes()).difference(hitting_set))
         #If we can handle the step of choosing the allowable set more 
         #efficiently, we can speed stuff up... this is the bottle neck
@@ -59,6 +61,7 @@ def random_spanning_tree_wilson(graph):
             tree_edges.append( [ new_branch[i], new_branch[i + 1]])
         for v in new_branch[:-1]:
             hitting_set.add(v)
+            len_hitting_set += 1
             allowable_set.remove(v)
     tree = nx.DiGraph()
     tree.add_nodes_from(list(graph.nodes()))
@@ -171,7 +174,7 @@ def random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks, delta
     while len(blocks) < 2**log2_num_blocks:
         subgraph_splits = []
         for subgraph in blocks:
-            subgraph_splits += random_almost_equi_partitions(subgraph, 1, 2)[0]
+            subgraph_splits += random_almost_equi_partitions(subgraph, 1, 2, delta)[0]
         blocks = subgraph_splits
     return blocks
 
@@ -179,5 +182,5 @@ def random_almost_equi_partitions_fast(graph, num_partitions, log2_num_blocks, d
     print("note: still need to addthe delta stuff ot this...")
     found_partitions = []
     while len(found_partitions) < num_partitions:
-        found_partitions.append(random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks))
+        found_partitions.append(random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks, delta))
     return found_partitions

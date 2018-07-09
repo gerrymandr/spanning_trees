@@ -23,6 +23,10 @@ def explore_random( graph_size, num_maps, num_blocks, pictures = False, divide_a
         graph = nx.grid_graph([graph_size, graph_size])
     if graph_type == "triangle":
         graph = nx.triangular_lattice_graph(graph_size, graph_size)
+    if graph_type == "torus":
+        cycle_1 = nx.cycle_graph(graph_size)
+        cycle_2 = nx.cycle_graph(graph_size)
+        graph = nx.cartesian_product(cycle_1, cycle_2)
 #    if graph_type == "dodeca":
 #        graph = nx.dodecahedral_graph()
         
@@ -43,7 +47,7 @@ def explore_random( graph_size, num_maps, num_blocks, pictures = False, divide_a
             if int(log2_num_blocks) != log2_num_blocks:
                 print("Must be power of 2 number of blocks")
                 return
-            tree_partitions = random_almost_equi_partitions_fast(graph, num_maps, log2_num_blocks)
+            tree_partitions = random_almost_equi_partitions_fast(graph, num_maps, log2_num_blocks, delta)
     if pictures == True:
         for partition in tree_partitions:
             visualize_partition(graph, partition)
@@ -67,7 +71,7 @@ def explore_walk(graph_size, num_blocks):
 #Wilson is more than 10 times faster for larger graphs...
 #    
 
-parts = explore_random(40,1,4, pictures = True, divide_and_conquer = True, equi = True, delta = .1)
+parts = explore_random(160,1,8, pictures = True, divide_and_conquer = True, equi = True, graph_type = "grid", delta = .1)
 #parts = explore_random(120,1,12, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
 #check_delta_equi_split([len(x) for x in parts[0]], .01)
 #explore_walk(8,4)

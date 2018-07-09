@@ -77,7 +77,7 @@ def test():
     
 def shadow_walk(graph, tree,e, equi_partition = False, metropolis = False):
     '''
-    Proposes a 
+    Proposes a tree walk step, and does MH
     
     '''
     n = len(e)
