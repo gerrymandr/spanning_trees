@@ -28,24 +28,25 @@ def explore_random(graph, num_maps, num_blocks, pictures = False, divide_and_con
      
     '''
     
-    if equi == True:
-        if divide_and_conquer == False:
-            tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
-        if divide_and_conquer == True:
-            log2_num_blocks = np.log2(num_blocks)
-            if int(log2_num_blocks) != log2_num_blocks:
-                print("Must be power of 2 number of blocks")
-                return
-            tree_partitions = random_equi_partitions_fast(graph, num_maps, log2_num_blocks)
-    if equi == False:
-        if divide_and_conquer == False:
-            tree_partitions = random_almost_equi_partitions(graph, num_maps, num_blocks, delta)
-        if divide_and_conquer == True:
-            log2_num_blocks = np.log2(num_blocks)
-            if int(log2_num_blocks) != log2_num_blocks:
-                print("Must be power of 2 number of blocks")
-                return
-            tree_partitions = random_almost_equi_partitions_fast(graph, num_maps, log2_num_blocks, delta)
+     # Checking partition parameter selections
+    if equi and divide_and_conquer:
+        log2_num_blocks = np.log2(num_blocks)
+        if int(log2_num_blocks) != log2_num_blocks:
+            print("Must be power of 2 number of blocks")
+            return
+        tree_partitions = random_equi_partitions_fast(graph, num_maps, log2_num_blocks)
+    elif equi and not divide_and_conquer:
+        tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
+    elif not equi and divide_and_conquer:
+        log2_num_blocks = np.log2(num_blocks)
+        if int(log2_num_blocks) != log2_num_blocks:
+            print("Must be power of 2 number of blocks")
+            return
+        tree_partitions = random_almost_equi_partitions_fast(graph, num_maps, log2_num_blocks, delta)
+    elif not equi and not divide_and_conquer:
+        tree_partitions = random_almost_equi_partitions(graph, num_maps, num_blocks, delta)
+    
+    # Visualizations        
     if pictures == True:
         for partition in tree_partitions:
             visualize_partition(graph, partition)
