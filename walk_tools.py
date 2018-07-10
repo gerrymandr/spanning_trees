@@ -37,48 +37,30 @@ def propose_step(graph,tree):
     tree.add_edge(edge_to_add[0], edge_to_add[1])
     cycle = nx.find_cycle(tree, orientation = 'ignore')
     #Can this be sped up since we know that the cycle contains edge_to_add?
+    
     edge_to_remove = random.choice(cycle)
     tree.remove_edge(edge_to_remove[0], edge_to_remove[1])
     
     
     
     
-    
-    #If edge_to_remove == edge_to_add ... then we've already removed it
-    
-#    if set( [edge_to_remove[0], edge_to_remove[1]]) != set([edge_to_add[0], edge_to_add[1]]):
-#        tree.remove_edge(edge_to_add[0], edge_to_add[1])
-        
-        #This is so that we get a directed graph at the end of this step...
-        
-        #Actually, what we need to do is iterate up through the tree, fixing 
-        #the orientatoins... this is at worst another topological sort.
-#        if tree.out_degree(edge_to_add[0]) == 0:
-#            tree.add_edge(edge_to_add[0], edge_to_add[1])
-#        if tree.out_degree(edge_to_add[1]) == 0:
-#            tree.add_edge(edge_to_add[1], edge_to_add[0])
-        #This doesn't work, because both already might have out_degree 1
-        #Think of a hook shape...
-        
-        
-    #Making a new tree is a dumb idea! That's really expensive...
-    #This is terrible!
-#    new_tree = nx.Graph()
-#    new_tree.add_edges_from(list(tree.edges()))
-#    new_tree.remove_edge(edge_to_remove[0], edge_to_remove[1])
-#    tree.remove_edge(edge_to_add[0], edge_to_add[1])
-    
-    #Instead of making dfs tree, which is expensive, just keep track of the orientations carefully... reverse is also taking a lot of time!
-    
-    
     re_rooted = nx.dfs_tree(tree.to_undirected(), list(tree.nodes())[0]).reverse()
     
-    #This is still very inefficient!
-    
+    #This is still very inefficient! .reverse makes a whole new graph!
     
     #Want to make it so that we don't need to call dfs and reverse here...
-
+    #Note clear how to do this... so instead, run Broders algorithm, which has
+    #any easy update step...
     return re_rooted, edge_to_remove, edge_to_add
+
+def propose_Broder_step(graph, tree):
+    root = tree.graph["root"]
+    new_root = random.choice(list(graph.neighbors(root)))
+    remove_edge = list(tree.out_edges(new_root))[0]
+    tree.add_edge(root, new_root)
+    tree.remove_edge(remove_edge[0], remove_edge[1])
+    tree.graph["root"] = new_root
+    return tree, [remove_edge[0], remove_edge[1]], remove_edge
 
 def equi_shadow_step(graph, tree, num_blocks):
     '''

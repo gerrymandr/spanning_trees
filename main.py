@@ -66,6 +66,8 @@ def test(graph_size, num_blocks, delta):
         
 def test_fast_with_walk(graph_size, num_blocks, delta):
     graph = nx.grid_graph([graph_size, graph_size])
+    for vertex in graph:
+        graph.nodes[vertex]["geopos"] = vertex
     tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta)
     for partition in tree_partitions:
         visualize_partition(graph, partition)
@@ -73,9 +75,10 @@ def test_fast_with_walk(graph_size, num_blocks, delta):
     
         
         
-test_fast_with_walk(320, 5, .01)
+test_fast_with_walk(100, 2, .01)
 '''
-Observation: When doing divide and conquer with walk
+Observation: When doing divide and conquer with walk, you don't need ot redraw a new tree
+at each stage, instead... just copy them over and have them start walking...
 
 '''
 

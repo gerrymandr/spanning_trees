@@ -48,7 +48,8 @@ def random_spanning_tree(graph):
 def random_spanning_tree_wilson(graph):
     #The David Wilson random spanning tree algorithm
     tree_edges = []
-    hitting_set = set ( [ random.choice(list(graph.nodes()))])
+    root = random.choice(list(graph.nodes()))
+    hitting_set = set ( [ root])
     allowable_set = set(graph.nodes()).difference(hitting_set)
     len_graph = len(graph)
     len_hitting_set = 1
@@ -68,7 +69,7 @@ def random_spanning_tree_wilson(graph):
     tree = nx.DiGraph()
     tree.add_nodes_from(list(graph.nodes()))
     tree.add_edges_from(tree_edges)
-    
+    tree.graph["root"] = root
     return tree
 
 def random_walk_until_hit(graph, start_node, hitting_set):
