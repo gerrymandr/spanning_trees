@@ -81,13 +81,18 @@ def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size
     
         
         
-test_fast_with_walk(320, 2, .1, "Broder", 50)
+test_fast_with_walk(160, 2, .1, "Broder", 50)
 '''
 Observations: 
     
     1. When doing divide and conquer with walk, you don't need ot redraw a new tree
 at each stage, instead... just copy them over and have them start walking...
 2. When updating with Broder walk, we should update the weights dynamically...
+3. Another option is 
+
+
+.... A compromise might be : sample a tree, and then do the Broder walk until you get an 
+equi partitoin, or an almost equipartition...
 
 '''
 
