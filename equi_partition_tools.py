@@ -73,7 +73,6 @@ def almost_equi_split(tree, num_blocks, delta):
     while found_blocks < num_blocks - 1:
         edge, ratio = choose_best_weight(tree, num_blocks)
         if (ratio >= 1 + delta) or (ratio <= 1 - delta):
-            print(ratio)
             return None
         found_edges.append(edge)
         found_blocks += 1

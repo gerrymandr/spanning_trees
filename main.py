@@ -7,7 +7,7 @@ Created on Fri Jul  6 17:32:53 2018
 
 from walk_tools import equi_shadow_walk
 import networkx as nx
-from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson, random_equi_partitions_fast, random_almost_equi_partitions_fast, random_almost_equi_partitions
+from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson, random_equi_partitions_fast, random_almost_equi_partitions_fast, random_almost_equi_partitions, random_almost_equi_partitions_with_walk
 from equi_partition_tools import check_delta_equi_split
 from visualization_tools import visualize_partition
 import numpy as np
@@ -63,8 +63,23 @@ def explore_walk(graph_size, num_blocks):
     tree_partitions =  equi_shadow_walk(graph, tree,  3, num_blocks)
     return tree_partitions
 
+def test(graph_size, num_blocks, delta):
+    graph = nx.grid_graph([graph_size, graph_size])
+    tree_partitions = random_almost_equi_partitions_with_walk(graph, 1, num_blocks, delta)
+    for partition in tree_partitions:
+        visualize_partition(graph, partition)
+        print([len(x) for x in partition])
+        
+        
+test(320, 2, .1)
+'''
+Propose step is super slow!!!!!!!!!!!
+'''
 
-parts = explore_random(40,1,4, pictures = True, divide_and_conquer = True, equi = False, graph_type = "grid", delta = .2)
+#The efficiency of this can depend on a lot whether you land near somewhere thats an
+#equipartition... maybe can be faster if we do the label updating in a smart way.
+
+#parts = explore_random(40,1,2, pictures = True, divide_and_conquer = True, equi = False, graph_type = "grid", delta = .2)
 #parts = explore_random(120,1,12, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
 #check_delta_equi_split([len(x) for x in parts[0]], .01)
 #explore_walk(8,4)
