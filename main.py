@@ -79,7 +79,7 @@ def test_fast_with_walk(graph_size, num_blocks, delta):
     
         
         
-test_fast_with_walk(320, 5, .025)
+test_fast_with_walk(320, 5, .01)
 '''
 Propose step is so slow!! It shouldn't be this slow!
 

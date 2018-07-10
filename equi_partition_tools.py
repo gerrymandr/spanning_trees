@@ -20,17 +20,6 @@ def equi_score_tree_edge_pair(G,T,e):
     x =  min([A / (A + B), B / (A + B)])
     return x
 
-#def almost_equi_split(tree):
-#    # Returns the partition if T can be split evenly in two
-#    # Else returns False
-#    label_weights(tree)
-#    edge, weight = choose_best_weight(tree)
-#
-#    if weight == len(tree) // 2:
-#        return edge
-#
-#    return False
-
 def equi_split(tree, num_blocks):
     '''This will return a perfect equi-partition into num_blocks blocks
     It will do so by running choose best weight_hard to peel off pieces of 
@@ -56,14 +45,14 @@ def equi_split(tree, num_blocks):
     return found_edges
 
 def almost_equi_split(tree, num_blocks, delta):
-    '''This returns a ...
+    '''This returns a partition from the that is delta close to be an equi-partition
     
-    Def: Let T be a spanning tree, and fix $\delta > 0$. If there is a subset of k edges E, so that removing the edges E from T gives components A_1, ... A_{k+1}, with |A_i| / |A_j| <= 1 + \delta for all $i$ and $j$, then say the $A_i$ are a $\delta$-equi partition, and $T$ is a k+1 delta-equi tree.
-    Chooses a random closest split for a tree...
+    Specifically, this runs choose_best_weight iteratively, which find an
+    edge whose removal make a new partition of size closest to len(tree) / num_blocks
     
-    
-    --- > CHanged his to 1 - delta < A / (n / k) < 1 + delta
-    
+    :tree: the input tree
+    :num_blocks: break tree in num_blocks partitions
+    :delta: each block must be within 
     
     '''
     label_weights(tree)

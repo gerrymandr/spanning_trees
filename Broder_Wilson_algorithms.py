@@ -49,7 +49,7 @@ def random_spanning_tree_wilson(graph):
     #The David Wilson random spanning tree algorithm
     tree_edges = []
     hitting_set = set ( [ random.choice(list(graph.nodes()))])
-    allowable_set = set(graph.nodes())
+    allowable_set = set(graph.nodes()).difference(hitting_set)
     len_graph = len(graph)
     len_hitting_set = 1
     while len_hitting_set < len_graph:
@@ -83,7 +83,10 @@ def random_walk_until_hit(graph, start_node, hitting_set):
     current_node = start_node
     trip = [current_node]
     while current_node not in hitting_set:
+        #Add weights here:
         current_node = random.choice(list(graph.neighbors(current_node)))
+        
+        ###
         trip.append(current_node)
     return trip
 
