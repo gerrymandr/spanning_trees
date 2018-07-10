@@ -4,7 +4,7 @@ Created on Fri Jul  6 17:28:34 2018
 
 @author: MGGG
 """
-from equi_partition_tools import equi_split, equi_score_tree_edge_pair
+from equi_partition_tools import equi_split
 import random
 import networkx as nx
 from Broder_Wilson_algorithms import random_spanning_tree_wilson
@@ -20,31 +20,65 @@ def propose_step(graph,tree):
     
     Need to modify this so that it spits out a tree with appropriate directedness
     
+    
     '''
+    #print("Propose step needs to be fixed!")
     tree_edges = set(tree.edges())
-    tree_edges_flipped = set([ tuple((e[1], e[0])) for e in tree_edges])
+    tree_edges_flipped = set([ tuple((edge[1], edge[0])) for edge in tree_edges])
     graph_edges = set(graph.edges())
-    #Because of stupid stuff in networkx - if we don't include the flipped
-    #list also, then the problem is that graph_edges might have an edge
-    #stored as (a,b) and tree_edges the same edge stored as (b,a), so it
-    #won't realize not to use that edge
+    #tree is a digraph, so we need to check both possible orientatoins in order to add
+    #an edge that makes an undirected cycle...
     
     
-    
-#    edges_not_in_tree = [e for e in graph_edges if e not in tree_edges and e not in tree_edges_flipped]
     edges_not_in_tree = list((graph_edges.difference(tree_edges)).difference(tree_edges_flipped))
     
-    e = random.choice(edges_not_in_tree)
-    tree.add_edges_from([e])
-    cycle = nx.find_cycle(tree, orientation = 'ignore')
-    w = random.choice(cycle)
-    new_tree = nx.Graph()
-    new_tree.add_edges_from(list(tree.edges()))
-    new_tree.remove_edges_from([w])
-    tree.remove_edges_from([e])
+    edge_to_add = random.choice(edges_not_in_tree)
     
-    return nx.dfs_tree(new_tree, list(new_tree.nodes())[0]).reverse()
+    tree.add_edge(edge_to_add[0], edge_to_add[1])
+    cycle = nx.find_cycle(tree, orientation = 'ignore')
+    #Can this be sped up since we know that the cycle contains edge_to_add?
+    edge_to_remove = random.choice(cycle)
+    tree.remove_edge(edge_to_remove[0], edge_to_remove[1])
+    
+    
+    
+    
+    
+    #If edge_to_remove == edge_to_add ... then we've already removed it
+    
+#    if set( [edge_to_remove[0], edge_to_remove[1]]) != set([edge_to_add[0], edge_to_add[1]]):
+#        tree.remove_edge(edge_to_add[0], edge_to_add[1])
+        
+        #This is so that we get a directed graph at the end of this step...
+        
+        #Actually, what we need to do is iterate up through the tree, fixing 
+        #the orientatoins... this is at worst another topological sort.
+#        if tree.out_degree(edge_to_add[0]) == 0:
+#            tree.add_edge(edge_to_add[0], edge_to_add[1])
+#        if tree.out_degree(edge_to_add[1]) == 0:
+#            tree.add_edge(edge_to_add[1], edge_to_add[0])
+        #This doesn't work, because both already might have out_degree 1
+        #Think of a hook shape...
+        
+        
+    #Making a new tree is a dumb idea! That's really expensive...
+    #This is terrible!
+#    new_tree = nx.Graph()
+#    new_tree.add_edges_from(list(tree.edges()))
+#    new_tree.remove_edge(edge_to_remove[0], edge_to_remove[1])
+#    tree.remove_edge(edge_to_add[0], edge_to_add[1])
+    
+    #Instead of making dfs tree, which is expensive, just keep track of the orientations carefully... reverse is also taking a lot of time!
+    
+    
+    re_rooted = nx.dfs_tree(tree.to_undirected(), list(tree.nodes())[0]).reverse()
+    
+    #This is still very inefficient!
+    
+    
+    #Want to make it so that we don't need to call dfs and reverse here...
 
+    return re_rooted, edge_to_remove, edge_to_add
 
 def equi_shadow_step(graph, tree, num_blocks):
     '''
@@ -57,7 +91,7 @@ def equi_shadow_step(graph, tree, num_blocks):
     '''
     
     while True:
-        new_tree = propose_step(graph, tree)
+        new_tree, edge_to_remove, edge_to_add = propose_step(graph, tree)
         edges = equi_split(new_tree, num_blocks)
         if edges != None:
             return (new_tree, edges)

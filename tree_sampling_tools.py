@@ -148,7 +148,7 @@ def random_almost_equi_partitions_with_walk(graph, num_partitions, num_blocks, d
     tree = random_spanning_tree_wilson(graph)
     while len(found_partitions) < num_partitions:
         counter += 1
-        tree = propose_step(graph, tree)
+        tree, edge_to_remove, edge_to_add = propose_step(graph, tree)
         edge_list = almost_equi_split(tree, num_blocks, delta)
         #If the almost equi split was not a delta split, then it returns none...
         if edge_list != None:

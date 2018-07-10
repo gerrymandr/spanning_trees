@@ -11,14 +11,14 @@ import networkx as nx
 import numpy as np
 import random
 
-def equi_score_tree_edge_pair(G,T,e):
-    T.remove_edges_from([e])
-    components = list(nx.connected_components(T))
-    T.add_edges_from([e])
-    A = len(components[0])
-    B = len(components[1])
-    x =  min([A / (A + B), B / (A + B)])
-    return x
+#def equi_score_tree_edge_pair(G,T,e):
+#    T.remove_edges_from([e])
+#    components = list(nx.connected_components(T))
+#    T.add_edges_from([e])
+#    A = len(components[0])
+#    B = len(components[1])
+#    x =  min([A / (A + B), B / (A + B)])
+#    return x
 
 def equi_split(tree, num_blocks):
     '''This will return a perfect equi-partition into num_blocks blocks
@@ -52,7 +52,7 @@ def almost_equi_split(tree, num_blocks, delta):
     
     :tree: the input tree
     :num_blocks: break tree in num_blocks partitions
-    :delta: each block must be within 
+    :delta: each block B must satisfy 1 - delta <= B / (tree / num_blocks) <= 1 + delta
     
     '''
     label_weights(tree)
@@ -68,14 +68,6 @@ def almost_equi_split(tree, num_blocks, delta):
         update_weights(tree, edge)
     return found_edges 
 
-#graph = nx.grid_graph([160,160])
-#closeness = []
-#for i in range(100):
-#    print("next tree:")
-#    tree = random_spanning_tree_wilson(graph)
-#    if almost_equi_split(tree, 2, .1) != None:
-#        print("Good")
-
 def check_delta_equi_split(subgraph_sizes, delta = .01):
     '''returns True if all ratios of sizes are all within 1 + delta
     :subgraph_sizes: list of sizes
@@ -86,12 +78,6 @@ def check_delta_equi_split(subgraph_sizes, delta = .01):
             if subgraph_sizes[i]/subgraph_sizes[j] > 1 + delta:
                 return False
     return True
-
-
-
-#tree = random_spanning_tree(graph)
-#label_weights(tree)
-#test_tree(tree)      
 
 def update_weights(tree, edge):
     '''update the weights of a graph after selecting an edge to cut
@@ -104,12 +90,9 @@ def update_weights(tree, edge):
     weight = tree.nodes[tail_node]["weight"] 
     set_label_zero_above(tree, tail_node)
     decrement_label_weights_below(tree, head_node, weight)
-    
-    
-###TODO: Make these non-recursive also.
-    
+
 def set_label_zero_above(tree, node):
-    '''sets the label weights to zero at and above the passed node
+    '''sets the label weights to zero at and above node
     '''
        
     ordering = list(nx.topological_sort(tree))
@@ -119,26 +102,18 @@ def set_label_zero_above(tree, node):
         if out_edge != []:
             if tree.nodes[out_edge[0][1]]["weight"] == 0:
                 tree.nodes[node]["weight"] = 0
-#            
-#def set_label_zero_above_recursive(tree, node):
-#    
-#    in_edges = tree.in_edges(node)
-#    tree.nodes[node]["weight"] = 0
-#    for edge in in_edges:
-#        set_label_zero_above_recursive(tree, edge[0])
-#        
+      
 def test_tree(tree):
+    '''For debugging purposes'''
     for vertex in tree:
             tree.nodes[vertex]["pos"] = vertex
     labels = nx.get_node_attributes(tree, "weight")
     nx.draw(tree, pos=nx.get_node_attributes(tree, 'pos'), labels= labels)
-    
-#graph = nx.grid_graph([5,5])
-#tree = random_spanning_tree(graph)
-#label_weights(tree) 
+
     
     
 def decrement_label_weights_below(tree, start_node, weight):
+    ''' Reduces the weight of all nodes at and below the start node'''
     
     node = start_node
     ordering = list(nx.topological_sort(tree))
@@ -155,20 +130,9 @@ def decrement_label_weights_below(tree, start_node, weight):
                     tree.nodes[node]["weight"] += -1 * weight
                     tree.nodes[node]["touched"] = 1
        
-#def decrement_label_weights_below_recursive(tree, node, weight):
-#    '''lowers the label weights by weight at and below the passed node
-#    '''
-#    out_edges = list(tree.out_edges(node))
-#
-#    tree.nodes[node]["weight"] += -1 * weight
-#    if not out_edges:
-#        return
-#    out_edges = out_edges[0]
-#    decrement_label_weights_below_recursive(tree, out_edges[1], weight)
-
 def label_weights(tree):
     '''
-    Label nodes of of a directed, rooted tree by their weights.
+    Label nodes of of a directed, rooted tree by the weight above that node.
 #
 #    :tree: NetworkX DiGraph.
 #    :returns: Nothing.
@@ -216,6 +180,8 @@ def choose_best_weight(tree, num_blocks):
 
     """
     len_tree = len(tree)
+    ###This should be changed to total populatoin.
+    
     ideal_value = len_tree/ num_blocks
     best_node = None
     best_difference = float("inf")

@@ -17,7 +17,7 @@ def explore_random( graph_size, num_maps, num_blocks, pictures = False, divide_a
     :fast: The divide and conquer strategy. Currently unclear what distirbution this gives.
     :pictures: whether to display pictures of the found plan
     
-    
+     
     '''
     if graph_type == "grid":
         graph = nx.grid_graph([graph_size, graph_size])
@@ -79,7 +79,13 @@ def test_fast_with_walk(graph_size, num_blocks, delta):
     
         
         
-test_fast_with_walk(320, 5, .01)
+test_fast_with_walk(100, 2, .01)
+'''
+Observation: When doing divide and conquer with walk
+
+'''
+
+
 '''
 Propose step is so slow!! It shouldn't be this slow!
 
