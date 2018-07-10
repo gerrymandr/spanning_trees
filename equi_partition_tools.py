@@ -148,7 +148,7 @@ def label_weights(tree):
     #This is a perfect problem for topological sorting!
     
     for node in tree.nodes:
-        tree.nodes[node]["weight"] = 1
+        tree.nodes[node]["weight"] = tree.nodes[node]["POP10"]
     
     
     ordering = nx.topological_sort(tree)
@@ -179,7 +179,9 @@ def choose_best_weight(tree, num_blocks):
     :returns: Tuple (edge, weight).
 
     """
-    len_tree = len(tree)
+    
+    pop = [tree.nodes[i]["POP10"] for i in tree.nodes()]
+    len_tree = np.sum(pop)
     ###This should be changed to total populatoin.
     
     ideal_value = len_tree/ num_blocks
