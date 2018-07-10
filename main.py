@@ -74,18 +74,16 @@ def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size
     graph = nx.grid_graph([graph_size, graph_size])
     for vertex in graph:
         graph.nodes[vertex]["geopos"] = vertex
+        graph.nodes[vertex]["POP10"] = 1
     tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta, step, jump_size)
     for partition in tree_partitions:
         visualize_partition(graph, partition)
         print([len(x) for x in partition])
     
         
-        
-<<<<<<< HEAD
-test_fast_with_walk(160, 2, .1, "Broder", 50)
-=======
-#test_fast_with_walk(320, 5, .01)
->>>>>>> b09e40e90e9004f72a7b8a5efd0e4f1080a79c15
+
+test_fast_with_walk(80, 2, .1, "Broder", 50)
+
 '''
 Observations: 
     
