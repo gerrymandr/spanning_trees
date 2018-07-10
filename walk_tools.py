@@ -61,6 +61,12 @@ def propose_Broder_step(graph, tree):
     tree.add_edge(root, new_root)
     tree.remove_edge(remove_edge[0], remove_edge[1])
     tree.graph["root"] = new_root
+    
+    index_new_root = tree.graph["ordering"].index(new_root)
+    tree.graph["ordering"].pop(index_new_root)
+    tree.graph["ordering"].append(new_root)
+
+    
     return tree, [remove_edge[0], remove_edge[1]], remove_edge
 
 def equi_shadow_step(graph, tree, num_blocks):

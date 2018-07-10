@@ -95,7 +95,8 @@ def set_label_zero_above(tree, node):
     '''sets the label weights to zero at and above node
     '''
        
-    ordering = list(nx.topological_sort(tree))
+    ordering = list(tree.graph["ordering"])
+
     tree.nodes[node]["weight"] = 0
     for node in ordering[::-1]:
         out_edge = list(tree.out_edges(node))
@@ -116,7 +117,8 @@ def decrement_label_weights_below(tree, start_node, weight):
     ''' Reduces the weight of all nodes at and below the start node'''
     
     node = start_node
-    ordering = list(nx.topological_sort(tree))
+    ordering = tree.graph["ordering"]
+
     for vertex in tree:
         tree.nodes[vertex]["touched"] = 0
     tree.nodes[node]["weight"] += -1 * weight
@@ -151,7 +153,8 @@ def label_weights(tree):
         tree.nodes[node]["weight"] = tree.nodes[node]["POP10"]
     
     
-    ordering = nx.topological_sort(tree)
+    ordering = tree.graph["ordering"]
+
     for node in ordering:
         parents = [ edge[0] for edge in tree.in_edges(node)]
         for parent in parents:

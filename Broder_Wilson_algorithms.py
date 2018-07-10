@@ -80,6 +80,7 @@ def random_spanning_tree_wilson(graph):
             tree.nodes[node][attr] = graph.nodes[node][attr]
     tree.add_edges_from(tree_edges)
     tree.graph["root"] = root
+    tree.graph["ordering"] = list(nx.topological_sort(tree))
     return tree
 
 def random_walk_until_hit(graph, start_node, hitting_set):
