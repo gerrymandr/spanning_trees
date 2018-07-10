@@ -143,8 +143,8 @@ def random_almost_equi_partitions_with_walk(graph, num_partitions, num_blocks, d
     the required amounts
     
     '''
-    print("am here")
-    print(step)
+#    print("am here")
+#    print(step)
     found_partitions = []
     counter = 0
     tree = random_spanning_tree_wilson(graph)
