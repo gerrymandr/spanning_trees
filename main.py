@@ -7,7 +7,7 @@ Created on Fri Jul  6 17:32:53 2018
 
 from walk_tools import equi_shadow_walk
 import networkx as nx
-from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson, random_equi_partitions_fast, random_almost_equi_partitions_fast, random_almost_equi_partitions, random_almost_equi_partitions_with_walk
+from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson, random_equi_partitions_fast, random_almost_equi_partitions_fast, random_almost_equi_partitions, random_almost_equi_partitions_with_walk, random_almost_equi_partitions_fast_with_walk
 from equi_partition_tools import check_delta_equi_split
 from visualization_tools import visualize_partition
 import numpy as np
@@ -70,11 +70,17 @@ def test(graph_size, num_blocks, delta):
         visualize_partition(graph, partition)
         print([len(x) for x in partition])
         
+def test_fast_with_walk(graph_size, num_blocks, delta):
+    graph = nx.grid_graph([graph_size, graph_size])
+    tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta)
+    for partition in tree_partitions:
+        visualize_partition(graph, partition)
+        print([len(x) for x in partition])
+    
         
-test(320, 2, .1)
-'''
-Propose step is super slow!!!!!!!!!!!
-'''
+        
+test_fast_with_walk(160, 3, .1)
+
 
 #The efficiency of this can depend on a lot whether you land near somewhere thats an
 #equipartition... maybe can be faster if we do the label updating in a smart way.
