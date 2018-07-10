@@ -81,7 +81,7 @@ def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size
     
         
         
-test_fast_with_walk(320, 2, .1, "Broder", 50)
+#test_fast_with_walk(320, 5, .01)
 '''
 Observations: 
     
