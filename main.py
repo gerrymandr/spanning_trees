@@ -18,7 +18,13 @@ def explore_random(graph, num_maps, num_blocks, pictures = False, divide_and_con
     
     :fast: The divide and conquer strategy. Currently unclear what distirbution this gives.
     :pictures: whether to display pictures of the found plan
-    
+    :num_maps: number of maps to produce
+    :num_blocks: number of blocks in each map
+    :pictures: whether to display a picture at the end
+    :divide_and_conquer: whether to use a divide and conquer algorithm... currently
+    input muts by a power of 2
+    :equi: Whether to hard constraint to same sized partitions
+    :delta: the tolerance with which to accept partitions that are not equal sized.
      
     '''
     
@@ -68,14 +74,14 @@ def test_fast_with_walk(graph_size, num_blocks, delta):
     graph = nx.grid_graph([graph_size, graph_size])
     for vertex in graph:
         graph.nodes[vertex]["geopos"] = vertex
-    tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta)
+    tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta, step = "Broder")
     for partition in tree_partitions:
         visualize_partition(graph, partition)
         print([len(x) for x in partition])
     
         
         
-test_fast_with_walk(100, 2, .01)
+test_fast_with_walk(160, 2, .1)
 '''
 Observation: When doing divide and conquer with walk, you don't need ot redraw a new tree
 at each stage, instead... just copy them over and have them start walking...

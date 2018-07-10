@@ -138,7 +138,7 @@ that can be equi split...
 
 '''
 
-def random_almost_equi_partitions_with_walk(graph, num_partitions, num_blocks, delta):
+def random_almost_equi_partitions_with_walk(graph, num_partitions, num_blocks, delta, step = "Basis"):
     '''This produces a delta almost equi partition... it keeps looping until it finds
     the required amounts
     
@@ -148,7 +148,10 @@ def random_almost_equi_partitions_with_walk(graph, num_partitions, num_blocks, d
     tree = random_spanning_tree_wilson(graph)
     while len(found_partitions) < num_partitions:
         counter += 1
-        tree, edge_to_remove, edge_to_add = propose_Broder_step(graph, tree)
+        if step == "Basis":
+            tree, edge_to_remove, edge_to_add = propose_step(graph, tree)
+        if step == "Broder":
+            tree, edge_to_remove, edge_to_add = propose_Broder_step(graph, tree)
         edge_list = almost_equi_split(tree, num_blocks, delta)
         #If the almost equi split was not a delta split, then it returns none...
         if edge_list != None:
@@ -159,7 +162,7 @@ def random_almost_equi_partitions_with_walk(graph, num_partitions, num_blocks, d
     return found_partitions
 
 ##
-def random_almost_equi_partition_fast_with_walk(graph, log2_num_blocks, delta):
+def random_almost_equi_partition_fast_with_walk(graph, log2_num_blocks, delta, step):
     '''Divide and conquer approach to finding almost equi-partitions.
     Similar idea to random_equi_partition_fast
     
@@ -168,17 +171,17 @@ def random_almost_equi_partition_fast_with_walk(graph, log2_num_blocks, delta):
     while len(blocks) < 2**log2_num_blocks:
         subgraph_splits = []
         for subgraph in blocks:
-            subgraph_splits += random_almost_equi_partitions_with_walk(subgraph, 1, 2, delta)[0]
+            subgraph_splits += random_almost_equi_partitions_with_walk(subgraph, 1, 2, delta, step)[0]
         blocks = subgraph_splits
     return blocks
 
-def random_almost_equi_partitions_fast_with_walk(graph, num_partitions, log2_num_blocks, delta):
+def random_almost_equi_partitions_fast_with_walk(graph, num_partitions, log2_num_blocks, delta, step = "Basis"):
     '''This builds up almost-equi partitions, it called random_almost_equi_partitoins_fast
     which does a divide and consquer to build up partitions...
     
     '''
     found_partitions = []
     while len(found_partitions) < num_partitions:
-        found_partitions.append(random_almost_equi_partition_fast_with_walk(graph, log2_num_blocks, delta))
+        found_partitions.append(random_almost_equi_partition_fast_with_walk(graph, log2_num_blocks, delta, step))
     return found_partitions
 
