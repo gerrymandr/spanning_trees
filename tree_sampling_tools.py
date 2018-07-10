@@ -164,7 +164,7 @@ def random_almost_equi_partition_fast_with_walk(graph, log2_num_blocks, delta):
     Similar idea to random_equi_partition_fast
     
     '''
-    blocks = random_equi_partitions(graph, 1, 2)[0]
+    blocks = random_almost_equi_partitions_with_walk(graph, 1, 2, delta)[0]
     while len(blocks) < 2**log2_num_blocks:
         subgraph_splits = []
         for subgraph in blocks:

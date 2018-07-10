@@ -79,8 +79,14 @@ def test_fast_with_walk(graph_size, num_blocks, delta):
     
         
         
-test_fast_with_walk(160, 3, .1)
+test_fast_with_walk(320, 5, .01)
+'''
+Propose step is so slow!! It shouldn't be this slow!
 
+Also I'm calling label_weights much more often than I should be... we should update
+then dynamically when doing the tree walk...
+
+'''
 
 #The efficiency of this can depend on a lot whether you land near somewhere thats an
 #equipartition... maybe can be faster if we do the label updating in a smart way.
