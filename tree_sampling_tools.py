@@ -11,6 +11,11 @@ import random
 from equi_partition_tools import equi_split, almost_equi_split, check_delta_equi_split
 from projection_tools import remove_edges_map
 
+'''
+
+Broder's algorithm
+
+'''
 def simple_random_walk(graph,node):
     '''takes'''
     wet = set([node])
@@ -23,6 +28,7 @@ def simple_random_walk(graph,node):
     return trip
 
 def forward_tree(graph,node):
+    
     walk = simple_random_walk(graph, node)
     edges = []
     for vertex in graph.nodes():
@@ -71,6 +77,11 @@ def random_spanning_tree_wilson(graph):
 
 def random_walk_until_hit(graph, start_node, hitting_set):
     '''Does a random walk from start_node until it hits the hitting_set
+    
+    :graph: input graph
+    :start_node: the node taht the graph starts at
+    :hitting_set: the set to stop at, i.e. the tree we are building up
+    
     '''
     
     current_node = start_node
@@ -84,8 +95,6 @@ def loop_erasure(trip):
     '''erases loops from a trip
     
     :trip: input of node names...
-    
-    TODO: What's the right way to get the last element...
     '''
     n = len(trip)
     loop_erased_walk_indices = []
@@ -99,13 +108,27 @@ def loop_erasure(trip):
     loop_erased_trip = [trip[i] for i in loop_erased_walk_indices]
     
     return (loop_erased_trip, branch_length + 1)
-    #I don't think that passing the length sped it up at all...
+    #I don't think that passing the length sped it up at all...?
 
-#################3
-    
+#################
+'''
+
+
+
+'''
 
 
 def random_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilson"):
+    '''
+    Here is the code that makes equi partitions.
+    
+    :graph:
+    :num_partitions:
+    :num_blocks: Number of blocks in each partition
+    
+    
+    
+    '''
     found_partitions = []
     counter = 0
     while len(found_partitions) < num_partitions:
@@ -115,24 +138,25 @@ def random_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilso
         if algorithm == "Wilson":
             tree = random_spanning_tree_wilson(graph)
         edge_list = equi_split(tree, num_blocks)
+        #edge_list will return None if there is no equi_split
         if edge_list != None:
             found_partitions.append( remove_edges_map(graph, tree, edge_list))
             print(len(found_partitions), "waiting time:", counter)
             counter = 0
+            #keeps track of how many trees it went through to find the one
+            #that could be equi split
     return found_partitions
 
-#def random_equi_partition_fast(graph, log2_num_blocks):
-#    found_partitions = []
-#    if log2_num_blocks == 1:
-#        found_partitions = random_equi_partitions(graph, 1, 2)[0]
-#    if log2_num_blocks > 1: 
-#        parts = random_equi_partitions(graph, 1, 2)[0]
-#        for subgraph in parts:    
-#            found_partitions += random_equi_partition_fast(subgraph, log2_num_blocks - 1)
-#    
-#    return found_partitions
-
-def random_equi_partition_fast_nonrecursive(graph, log2_num_blocks):
+def random_equi_partition_fast(graph, log2_num_blocks):
+    '''This is a divide and conquer algorithm that speeds up the search
+    for an equipartition...
+    
+    The way it works is that it find a tree that equi-splits graph into two
+    subgraphs, and then repeats this procedure on each subgraph until we have 
+    the desired number of blocks in the subgraph.
+    
+    
+    '''
     blocks = random_equi_partitions(graph, 1, 2)[0]
     while len(blocks) < 2**log2_num_blocks:
         subgraph_splits = []
@@ -142,9 +166,12 @@ def random_equi_partition_fast_nonrecursive(graph, log2_num_blocks):
     return blocks
 
 def random_equi_partitions_fast(graph, num_partitions, log2_num_blocks):
+    '''This calls random_equi_partition_fast until you have num_partitions 
+    partitions
+    '''
     found_partitions = []
     while len(found_partitions) < num_partitions:
-        found_partitions.append(random_equi_partition_fast_nonrecursive(graph, log2_num_blocks))
+        found_partitions.append(random_equi_partition_fast(graph, log2_num_blocks))
     return found_partitions
 
 
@@ -152,7 +179,8 @@ def random_equi_partitions_fast(graph, num_partitions, log2_num_blocks):
 
 
 def random_almost_equi_partitions(graph, num_partitions, num_blocks, delta):
-    '''This produces a delta almost equi partition
+    '''This produces a delta almost equi partition... it keeps looping until it finds
+    the required amounts
     
     '''
     found_partitions = []
@@ -160,16 +188,21 @@ def random_almost_equi_partitions(graph, num_partitions, num_blocks, delta):
     while len(found_partitions) < num_partitions:
         counter += 1
         tree = random_spanning_tree_wilson(graph)
-        edge_list = almost_equi_split(tree, num_blocks)   
-        blocks = remove_edges_map(graph, tree, edge_list)
-        if check_delta_equi_split([len(x) for x in blocks], delta):
-            found_partitions.append( blocks)
+        edge_list = almost_equi_split(tree, num_blocks, delta)
+        #If the almost equi split was not a delta split, then it returns none...
+        if edge_list != None:
+            blocks = remove_edges_map(graph, tree, edge_list)
+            found_partitions.append(blocks)
             print(len(found_partitions), "waiting time:", counter)
             counter = 0
     return found_partitions
 
 ##
-def random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks, delta):
+def random_almost_equi_partition_fast(graph, log2_num_blocks, delta):
+    '''Divide and conquer approach to finding almost equi-partitions.
+    Similar idea to random_equi_partition_fast
+    
+    '''
     blocks = random_equi_partitions(graph, 1, 2)[0]
     while len(blocks) < 2**log2_num_blocks:
         subgraph_splits = []
@@ -179,8 +212,26 @@ def random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks, delta
     return blocks
 
 def random_almost_equi_partitions_fast(graph, num_partitions, log2_num_blocks, delta):
-    print("note: still need to addthe delta stuff ot this...")
+    '''This builds up almost-equi partitions, it called random_almost_equi_partitoins_fast
+    which does a divide and consquer to build up partitions...
+    
+    '''
     found_partitions = []
     while len(found_partitions) < num_partitions:
-        found_partitions.append(random_almost_equi_partition_fast_nonrecursive(graph, log2_num_blocks, delta))
+        found_partitions.append(random_almost_equi_partition_fast(graph, log2_num_blocks, delta))
     return found_partitions
+
+
+############  Almost equi-partitions using sampling, then MH on trees 
+    
+print("Code the sampling + tree walk to find equi-partitionable trees...")
+    
+'''To be filled in -- this will draw a random spanning tree, and check if it can be 
+almost equi split (delta can be set to be zero...) 
+
+[Aside: You can clean up the code by putting delta  =0 to be equi-partitions...]
+
+then it will run a the tree walk, updated the labels dynamically, until it gets to a tree
+that can be equi split...
+
+'''

@@ -12,9 +12,6 @@ import random
 
 ######Projection tools:
     
-'''use exercise 2 on dual graph and trees for isospannimetric 
-because when you delete the super node... the number of edges you remove is equal
-to the perimeter...'''
     
 def remove_edges_map(graph,tree,edge_list):
     '''This is the map that produces a partition from a tree and a list of edges

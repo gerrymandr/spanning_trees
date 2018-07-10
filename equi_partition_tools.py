@@ -55,33 +55,38 @@ def equi_split(tree, num_blocks):
             return None
     return found_edges
 
-def almost_equi_split(tree, num_blocks):
+def almost_equi_split(tree, num_blocks, delta):
     '''This returns a ...
     
     Def: Let T be a spanning tree, and fix $\delta > 0$. If there is a subset of k edges E, so that removing the edges E from T gives components A_1, ... A_{k+1}, with |A_i| / |A_j| <= 1 + \delta for all $i$ and $j$, then say the $A_i$ are a $\delta$-equi partition, and $T$ is a k+1 delta-equi tree.
     Chooses a random closest split for a tree...
     
     
+    --- > CHanged his to 1 - delta < A / (n / k) < 1 + delta
+    
+    
     '''
     label_weights(tree)
-    #Idea, keep building it up until you get stuck (?) is that uniform?
-    #I think so...
+
     found_edges = []
     found_blocks = 0
     while found_blocks < num_blocks - 1:
-        edge = choose_best_weight(tree, num_blocks)[0]
-        if edge != None:
-            '''
-            
-            iF WEIGHT NOT GOOD, REJECT... ITS NOT NONE
-            
-            '''
-            found_edges.append(edge)
-            found_blocks += 1
-            update_weights(tree, edge)
-        if edge == None:
+        edge, ratio = choose_best_weight(tree, num_blocks)
+        if (ratio => 1 + delta) or (ratio <= 1 - delta):
+            print(ratio)
             return None
+        found_edges.append(edge)
+        found_blocks += 1
+        update_weights(tree, edge)
     return found_edges 
+
+#graph = nx.grid_graph([160,160])
+#closeness = []
+#for i in range(100):
+#    print("next tree:")
+#    tree = random_spanning_tree_wilson(graph)
+#    if almost_equi_split(tree, 2, .1) != None:
+#        print("Good")
 
 def check_delta_equi_split(subgraph_sizes, delta = .01):
     '''returns True if all ratios of sizes are all within 1 + delta
@@ -222,14 +227,14 @@ def choose_best_weight(tree, num_blocks):
     :returns: Tuple (edge, weight).
 
     """
-
+    len_tree = len(tree)
+    ideal_value = len_tree/ num_blocks
     best_node = None
     best_difference = float("inf")
     tree_nodes = list(tree.nodes())
     random.shuffle(tree_nodes)
     for node in tree_nodes:
-        #DOes this in a random way?
-        diff = abs(len(tree) / num_blocks - tree.nodes[node]["weight"])
+        diff = abs(ideal_value - tree.nodes[node]["weight"])
         if diff < best_difference:
             best_node = node
             best_difference = diff
@@ -237,4 +242,4 @@ def choose_best_weight(tree, num_blocks):
     edge = list(tree.edges(best_node))[0]
     weight = tree.nodes[best_node]["weight"]
 
-    return (edge, weight)
+    return (edge, ideal_value /  weight)
