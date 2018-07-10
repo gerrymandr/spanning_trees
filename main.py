@@ -70,21 +70,24 @@ def test(graph_size, num_blocks, delta):
         visualize_partition(graph, partition)
         print([len(x) for x in partition])
         
-def test_fast_with_walk(graph_size, num_blocks, delta):
+def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size = 50):
     graph = nx.grid_graph([graph_size, graph_size])
     for vertex in graph:
         graph.nodes[vertex]["geopos"] = vertex
-    tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta, step = "Broder")
+    tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta, step, jump_size)
     for partition in tree_partitions:
         visualize_partition(graph, partition)
         print([len(x) for x in partition])
     
         
         
-test_fast_with_walk(160, 2, .1)
+test_fast_with_walk(320, 2, .1, "Broder", 50)
 '''
-Observation: When doing divide and conquer with walk, you don't need ot redraw a new tree
+Observations: 
+    
+    1. When doing divide and conquer with walk, you don't need ot redraw a new tree
 at each stage, instead... just copy them over and have them start walking...
+2. When updating with Broder walk, we should update the weights dynamically...
 
 '''
 

@@ -22,7 +22,7 @@ def propose_step(graph,tree):
     
     
     '''
-    #print("Propose step needs to be fixed!")
+    print("Propose step needs to be fixed!")
     tree_edges = set(tree.edges())
     tree_edges_flipped = set([ tuple((edge[1], edge[0])) for edge in tree_edges])
     graph_edges = set(graph.edges())
@@ -54,6 +54,7 @@ def propose_step(graph,tree):
     return re_rooted, edge_to_remove, edge_to_add
 
 def propose_Broder_step(graph, tree):
+    
     root = tree.graph["root"]
     new_root = random.choice(list(graph.neighbors(root)))
     remove_edge = list(tree.out_edges(new_root))[0]
