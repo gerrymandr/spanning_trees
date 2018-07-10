@@ -46,7 +46,7 @@ def visualize_partition_with_likelihoods(graph, partition, color_likelihood = Fa
     plt.show()
     
     
-def visualize_partition_and_tree(graph, partitoin, tree):
+def visualize_partition_and_tree(graph, partition, tree):
     for i in range(len(partition)):
         for vertex in partition[i].nodes():
             graph.nodes[vertex]["district"] = i
