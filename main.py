@@ -11,7 +11,9 @@ from tree_sampling_tools import random_equi_partitions, random_spanning_tree, ra
 from equi_partition_tools import check_delta_equi_split
 from visualization_tools import visualize_partition
 import numpy as np
-def explore_random( graph_size, num_maps, num_blocks, pictures = False, divide_and_conquer = False, equi = False, graph_type = "grid", delta = .1):
+
+
+def explore_random(graph, num_maps, num_blocks, pictures = False, divide_and_conquer = False, equi = False, delta = .1):
     '''This samples random equi-partitoins according to natural likelihood
     
     :fast: The divide and conquer strategy. Currently unclear what distirbution this gives.
@@ -19,15 +21,7 @@ def explore_random( graph_size, num_maps, num_blocks, pictures = False, divide_a
     
      
     '''
-    if graph_type == "grid":
-        graph = nx.grid_graph([graph_size, graph_size])
-    if graph_type == "triangle":
-        graph = nx.triangular_lattice_graph(graph_size, graph_size)
-    if graph_type == "torus":
-        cycle_1 = nx.cycle_graph(graph_size)
-        cycle_2 = nx.cycle_graph(graph_size)
-        graph = nx.cartesian_product(cycle_1, cycle_2)
-        
+    
     if equi == True:
         if divide_and_conquer == False:
             tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
@@ -79,7 +73,7 @@ def test_fast_with_walk(graph_size, num_blocks, delta):
     
         
         
-test_fast_with_walk(100, 2, .01)
+test_fast_with_walk(320, 5, .01)
 '''
 Observation: When doing divide and conquer with walk
 

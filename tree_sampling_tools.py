@@ -97,7 +97,7 @@ def random_almost_equi_partitions(graph, num_partitions, num_blocks, delta):
             found_partitions.append(blocks)
             print(len(found_partitions), "waiting time:", counter)
             counter = 0
-    return found_partition
+    return found_partitions
 
 ##
 def random_almost_equi_partition_fast(graph, log2_num_blocks, delta):

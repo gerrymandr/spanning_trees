@@ -13,7 +13,7 @@ def visualize_partition(graph, partition, color_likelihood = False):
     for i in range(len(partition)):
         for vertex in partition[i].nodes():
             graph.nodes[vertex]["district"] = i
-            graph.nodes[vertex]["pos"] = vertex
+            graph.nodes[vertex]["pos"] = graph.nodes[vertex]["geopos"]
     for edge in graph.edges():
         graph.edges[edge]["tree"] = 0
         
