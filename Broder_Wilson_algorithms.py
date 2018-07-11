@@ -37,9 +37,11 @@ def random_spanning_tree(graph):
     #It's going to be faster to use the David Wilson algorithm here instead.
     tree_edges = forward_tree(graph, random.choice(list(graph.nodes())))
     tree = nx.DiGraph()
-    for node in nodes_to_add:
-        tree.add_node(node, attr_dict = graph.nodes[node])
-
+    for node in graph.nodes:
+        node_attributes = list(graph.nodes[node].keys())
+        tree.add_node(node)
+        for attr in node_attributes:
+            tree.nodes[node][attr] = graph.nodes[node][attr]
 
     tree.add_edges_from(tree_edges)
     return tree
