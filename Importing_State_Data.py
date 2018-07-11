@@ -5,12 +5,12 @@ Created on Wed Jul 11 10:39:18 2018
 @author: MGGG
 """
 
-from main import explore_random
+from main import explore_random, total_pop
 
 import json
 import networkx as nx
 
-state = "17"
+state = "48"
 
 with open("../vtd-adjacency-graphs/vtd-adjacency-graphs/"+str(state)+"/rook.json") as f:
     data = json.load(f)
@@ -45,6 +45,9 @@ import matplotlib.pyplot as plt
 #
 #plt.figure(figsize = (10,7))
 #nx.draw(graph, pos = pos, node_size=0)
+print(len(graph))
 
 
-explore_random(graph, 1, 2, pictures = True, divide_and_conquer=True)
+parts = explore_random(graph, 1, 36, pictures = True, divide_and_conquer=False, delta = .5)
+
+#populations = [total_pop]
