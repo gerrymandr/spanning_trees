@@ -85,7 +85,7 @@ def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size
 #tree_1 = random_spanning_tree(graph)
 #tree_2 = random_spanning_tree_wilson(graph)    
 
-test_fast_with_walk(160, 2, .1, "Broder", 1)
+test_fast_with_walk(120, 2, 0.01, "Broder", 1000)
 
 '''
 Observations: 
@@ -95,10 +95,22 @@ at each stage, instead... just copy them over and have them start walking...
 2. When updating with Broder walk, we should update the weights dynamically...
 3. Another option is 
 
+Start a Broder walk, and build a forward tree... then after you've covered a certain 
+percentage of nodes, switch to Wilsons...
 
 .... A compromise might be : sample a tree, and then do the Broder walk until you get an 
 equi partitoin, or an almost equipartition...
 
+'''
+
+'''
+TODO:
+    
+    1. Update labels dynamically --- for Broder walk anyway
+    2. Try a mixture of Broder and Wilson for generating the original walk.
+    3. NOTE -- If possible, I want to stick to a process which is guaranteed to sample uniformly form trees
+    ... so doing the walk until we get a tree that can be equisplit is preferable...
+    4. 
 '''
 
 

@@ -45,7 +45,7 @@ def propose_step(graph,tree):
     
     
     re_rooted = nx.dfs_tree(tree.to_undirected(), list(tree.nodes())[0]).reverse()
-    
+    tree.graph["ordering"] = nx.topological_sort(tree)
     #This is still very inefficient! .reverse makes a whole new graph!
     
     #Want to make it so that we don't need to call dfs and reverse here...
