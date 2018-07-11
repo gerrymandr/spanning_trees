@@ -85,7 +85,7 @@ def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size
 #tree_1 = random_spanning_tree(graph)
 #tree_2 = random_spanning_tree_wilson(graph)    
 
-test_fast_with_walk(120, 2, 0.01, "Broder", 1000)
+#test_fast_with_walk(120, 2, 0.01, "Broder", 1000)
 
 '''
 Observations: 
