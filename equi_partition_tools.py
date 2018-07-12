@@ -190,7 +190,8 @@ def choose_best_weight(tree, num_blocks):
     ideal_value = len_tree/ num_blocks
     best_node = None
     best_difference = float("inf")
-    tree_nodes = list(tree.nodes())
+    tree_nodes = list( set(tree.nodes()).difference( set( tree.graph["root"])) )
+    #Not allowed to pick root, causes problems
     random.shuffle(tree_nodes)
     for node in tree_nodes:
         diff = abs(ideal_value - tree.nodes[node]["weight"])

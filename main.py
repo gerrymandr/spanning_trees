@@ -49,7 +49,7 @@ def explore_random(graph, num_maps, num_blocks, pictures = False, divide_and_con
     # Visualizations        
     if pictures == True:
         for partition in tree_partitions:
-            visualize_partition_with_populations(graph, partition)
+            visualize_partition(graph, partition)
             print("Node sizes", [len(x) for x in partition])
             print("Population", [total_pop(x) for x in partition])
             

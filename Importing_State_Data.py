@@ -42,12 +42,13 @@ for node in node_list:
         print(graph.nodes[node])
 
 import matplotlib.pyplot as plt
-#
+##
 #plt.figure(figsize = (10,7))
 #nx.draw(graph, pos = pos, node_size=0)
-print(len(graph))
-
-
-parts = explore_random(graph, 1, 36, pictures = True, divide_and_conquer=False, delta = .5)
+#
+#print(len(graph))
+#
+#
+parts = explore_random(graph, 1, 36, pictures = True, divide_and_conquer=False, delta = .3)
 
 #populations = [total_pop]
