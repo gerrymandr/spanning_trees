@@ -16,7 +16,8 @@ def simple_random_walk(graph,node):
     '''takes'''
     wet = set([node])
     trip = [node]
-    while len(wet) < len(graph.nodes()):
+    graph_size = len(graph.nodes())
+    while len(wet) < graph_size:
         next_step = random.choice(list(graph.neighbors(node)))
         wet.add(next_step)
         trip.append(next_step)
@@ -122,3 +123,20 @@ def loop_erasure(trip):
     
     return (loop_erased_trip, branch_length + 1)
     #I don't think that passing the length sped it up at all...?
+
+############Non Uniform Spanning Tree Generation:
+    
+def random_greedy(graph):
+    '''This uses prims algorithm with a random weighting to make a tree. 
+    This is  slow.
+    
+    '''
+    graph_edges = list(graph.edges())
+    random.shuffle(graph_edges)
+    tree = nx.Graph()
+    for edge in graph_edges:
+        tree.add_edge(edge[0], edge[1])
+        if not nx.is_forest(tree):
+            tree.remove_edge(edge[0], edge[1])
+    return tree
+
