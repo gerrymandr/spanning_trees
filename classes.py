@@ -4,41 +4,36 @@ Created on Mon Jul 16 12:21:16 2018
 
 @author: MGGG
 """
-
-'''
-The sampler class:
-    
-    variables: graph, num_partitions, num_blocks, list of trees
-    
-    functions: random_sample_wilson (import from tree sample)
-     divide and consquer
-     
-    Walk tools ... takes a tree in the list of trees and walks until it meets the criterion... clean up walk tools, and import from there...
-    
-    
-    projections (import from projection tools)
-    
-The tree class: 
-    extends graph
-    
-    variables: root, topological_ordering'''
-
 class Sampler:
-    ''' blah '''
-    
+    '''    This allows for easy sampling by storing all desired sampling parametrics.
+    '''
     def __init__(self, graph, num_partitions, num_blocks, trees, sampling_function):
-        ''' blah '''
-        # TODO
+        '''
+        :graph: the map graph
+        :num_partitions: number of partitions/districts
+        :num_blocks: number of blocks in each map
+        :trees: list of trees
+        :sampling_function: method of partition sampling
+        '''
         self.graph = graph
         self.num_partitions = num_partitions
         self.num_blocks = num_blocks
         self.trees = trees
         self.sampling_function = sampling_function
+        self.working_subgraph = graph
+
+    def set_working_subgraph(self, subgraph):
+        self.working_subraph = subgraph
 
 
 class Tree:
-    ''' blah '''
-
+    '''
+    This is meant to be an extension of a networkx graph to keep track of root and topological ordering
+    '''
     def __init__(self, root, topological_ordering):
-        ''' blah '''
-        # TODO
+        '''
+        :root:
+        :topological_ordering:
+        '''
+        self.root = root
+        self.topological_ordering = topological_ordering
