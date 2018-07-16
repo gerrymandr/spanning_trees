@@ -11,15 +11,6 @@ import networkx as nx
 import numpy as np
 import random
 
-#def equi_score_tree_edge_pair(G,T,e):
-#    T.remove_edges_from([e])
-#    components = list(nx.connected_components(T))
-#    T.add_edges_from([e])
-#    A = len(components[0])
-#    B = len(components[1])
-#    x =  min([A / (A + B), B / (A + B)])
-#    return x
-
 def equi_split(tree, num_blocks):
     '''This will return a perfect equi-partition into num_blocks blocks
     It will do so by running choose best weight_hard to peel off pieces of 
@@ -44,7 +35,7 @@ def equi_split(tree, num_blocks):
             return None
     return found_edges
 
-def almost_equi_split(tree, num_blocks, delta):
+def delta_equi_split(tree, num_blocks, delta):
     '''This returns a partition from the that is delta close to be an equi-partition
     
     Specifically, this runs choose_best_weight iteratively, which find an
