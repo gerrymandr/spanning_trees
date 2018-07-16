@@ -49,6 +49,6 @@ import matplotlib.pyplot as plt
 #print(len(graph))
 #
 #
-parts = explore_random(graph, 1, 6, pictures = True, divide_and_conquer=False,with_walk = True, delta = .1)
+parts = explore_random(graph, 1, 6, pictures = True, divide_and_conquer=False,with_walk = False, delta = .1)
 
 #populations = [total_pop]

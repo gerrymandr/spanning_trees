@@ -37,8 +37,8 @@ def explore_random(graph, num_maps, num_blocks, pictures = False, divide_and_con
     '''
     if with_walk == True:
         step = "Broder"
-        jump_size = 50
-        tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta, step, jump_size)
+        jump_size = 1
+        tree_partitions = random_almost_equi_partitions_with_walk(graph, 1, num_blocks, delta, step, jump_size)
     if with_walk == False:
      # Checking partition parameter selections
         if equi and divide_and_conquer:
