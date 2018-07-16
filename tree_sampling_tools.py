@@ -42,7 +42,7 @@ def random_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilso
         edge_list = equi_split(tree, num_blocks)
         #edge_list will return None if there is no equi_split
         if edge_list != None:
-            found_partitions.append( remove_edges_map(graph, tree, edge_list))
+            found_partitions.append(remove_edges_map(graph, tree, edge_list))
             print(len(found_partitions), "waiting time:", counter)
             counter = 0
             #keeps track of how many trees it went through to find the one
@@ -126,7 +126,6 @@ def random_almost_equi_partitions_fast(graph, num_partitions, log2_num_blocks, d
 
 ############  Almost equi-partitions using sampling, then MH on trees 
     
-print("Code the sampling + tree walk to find equi-partitionable trees...")
     
 '''To be filled in -- this will draw a random spanning tree, and check if it can be 
 almost equi split (delta can be set to be zero...) 

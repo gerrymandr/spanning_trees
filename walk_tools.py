@@ -22,7 +22,7 @@ def propose_step(graph,tree):
     
     
     '''
-    print("Propose step needs to be fixed!")
+    print("Propose step needs to be fixed! ... to include population")
     tree_edges = set(tree.edges())
     tree_edges_flipped = set([ tuple((edge[1], edge[0])) for edge in tree_edges])
     graph_edges = set(graph.edges())

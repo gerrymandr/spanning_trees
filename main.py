@@ -13,7 +13,7 @@ from visualization_tools import visualize_partition, visualize_partition_with_po
 import numpy as np
 
 
-def explore_random(graph, num_maps, num_blocks, pictures = False, divide_and_conquer = False, equi = False, delta = .1):
+def explore_random(graph, num_maps, num_blocks, pictures = False, divide_and_conquer = False, equi = False, with_walk = True, delta = .1):
     '''This samples random equi-partitoins according to natural likelihood
     
     :fast: The divide and conquer strategy. Currently unclear what distirbution this gives.
@@ -28,23 +28,35 @@ def explore_random(graph, num_maps, num_blocks, pictures = False, divide_and_con
      
     '''
     
+    
+    '''easy fixes:
+        
+        1. Replace equi with delta = 0
+        2. 
+        
+    '''
+    if with_walk == True:
+        step = "Broder"
+        jump_size = 50
+        tree_partitions = random_almost_equi_partitions_fast_with_walk(graph, 1, num_blocks, delta, step, jump_size)
+    if with_walk == False:
      # Checking partition parameter selections
-    if equi and divide_and_conquer:
-        log2_num_blocks = np.log2(num_blocks)
-        if int(log2_num_blocks) != log2_num_blocks:
-            print("Must be power of 2 number of blocks")
-            return
-        tree_partitions = random_equi_partitions_fast(graph, num_maps, log2_num_blocks)
-    elif equi and not divide_and_conquer:
-        tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
-    elif not equi and divide_and_conquer:
-        log2_num_blocks = np.log2(num_blocks)
-        if int(log2_num_blocks) != log2_num_blocks:
-            print("Must be power of 2 number of blocks")
-            return
-        tree_partitions = random_almost_equi_partitions_fast(graph, num_maps, log2_num_blocks, delta)
-    elif not equi and not divide_and_conquer:
-        tree_partitions = random_almost_equi_partitions(graph, num_maps, num_blocks, delta)
+        if equi and divide_and_conquer:
+            log2_num_blocks = np.log2(num_blocks)
+            if int(log2_num_blocks) != log2_num_blocks:
+                print("Must be power of 2 number of blocks")
+                return
+            tree_partitions = random_equi_partitions_fast(graph, num_maps, log2_num_blocks)
+        elif equi and not divide_and_conquer:
+            tree_partitions = random_equi_partitions(graph, num_maps, num_blocks)
+        elif not equi and divide_and_conquer:
+            log2_num_blocks = np.log2(num_blocks)
+            if int(log2_num_blocks) != log2_num_blocks:
+                print("Must be power of 2 number of blocks")
+                return
+            tree_partitions = random_almost_equi_partitions_fast(graph, num_maps, log2_num_blocks, delta)
+        elif not equi and not divide_and_conquer:
+            tree_partitions = random_almost_equi_partitions(graph, num_maps, num_blocks, delta)
     
     # Visualizations        
     if pictures == True:
@@ -85,6 +97,8 @@ def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size
     for partition in tree_partitions:
         visualize_partition(graph, partition)
         print([len(x) for x in partition])
+        
+        
     
 #graph = nx.grid_graph([50,50])
 #tree_1 = random_spanning_tree(graph)
