@@ -35,7 +35,8 @@ def equi_split(tree, num_blocks):
             return None
     return found_edges
 
-def delta_equi_split(tree, num_blocks, delta):
+def delta_equi_split(sampler):
+    #(tree, num_blocks, delta):
     '''This returns a partition from the that is delta close to be an equi-partition
     
     Specifically, this runs choose_best_weight iteratively, which find an
@@ -46,29 +47,29 @@ def delta_equi_split(tree, num_blocks, delta):
     :delta: each block B must satisfy 1 - delta <= B / (tree / num_blocks) <= 1 + delta
     
     '''
-    label_weights(tree)
+    label_weights(sampler.tree)
 
     found_edges = []
     found_blocks = 0
-    while found_blocks < num_blocks - 1:
-        edge, ratio = choose_best_weight(tree, num_blocks)
-        if (ratio >= 1 + delta) or (ratio <= 1 - delta):
+    while found_blocks < sampler.num_blocks - 1:
+        edge, ratio = choose_best_weight(sampler)
+        if (ratio >= 1 + sampler.delta) or (ratio <= 1 - sampler.delta):
             return None
         found_edges.append(edge)
         found_blocks += 1
-        update_weights(tree, edge)
+        update_weights(sampler.tree, edge)
     return found_edges 
 
-def check_delta_equi_split(subgraph_sizes, delta = .01):
-    '''returns True if all ratios of sizes are all within 1 + delta
-    :subgraph_sizes: list of sizes
-    '''
-
-    for i in range(len(subgraph_sizes)):
-        for j in range(i, len(subgraph_sizes)):
-            if subgraph_sizes[i]/subgraph_sizes[j] > 1 + delta:
-                return False
-    return True
+#def check_delta_equi_split(subgraph_sizes, delta = .01):
+#    '''returns True if all ratios of sizes are all within 1 + delta
+#    :subgraph_sizes: list of sizes
+#    '''
+#
+#    for i in range(len(subgraph_sizes)):
+#        for j in range(i, len(subgraph_sizes)):
+#            if subgraph_sizes[i]/subgraph_sizes[j] > 1 + delta:
+#                return False
+#    return True
 
 def update_weights(tree, edge):
     '''update the weights of a graph after selecting an edge to cut

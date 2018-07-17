@@ -50,11 +50,25 @@ def random_partition(sampler):
         print("exceeded waiting time")
         return None
     
-def walk_until_satisfied(sampler):
+def tree_step(sampler):
     
     '''
     
     '''
+    
+def ent_walk(sampler):
+    '''This takes sampler.current_pair, which is already a (T,E) tuple, does a walk on the (T,E) pairs (using sampler.walk_method)  
+    sampler.tree = lift(sampler)
+    '''
+    
+    
+def instantiate_pair(partition)
+    '''This takes the partition, and lifts it to a (T,E) tuple...
+    '''
+    
+    
+    
+    
 #def random_equi_partition_fast(graph, num_blocks, tree_algorithm, delta, pruning_algorithm):
 #    '''This is a divide and conquer algorithm that speeds up the search
 #    for an equipartition...
