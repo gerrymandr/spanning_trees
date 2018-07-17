@@ -36,16 +36,25 @@ class Sampler:
 
 
 
-class Tree_Partition_Pair:
+class Tree_Edges_Partition_Tuple:
     '''
     This is meant to be an extension of a networkx graph to keep track of root and topological ordering.
     '''
-    def __init__(self, root, topological_ordering, partition):
+    def __init__(self, root, topological_ordering, partition=None):
         '''
         :root:
         :topological_ordering:
-        :partition
+        :partition:
+        :edges: edges to be cut
         '''
+        # TODO: Check if this isn't doing something stupid 
         self.root = root
         self.topological_ordering = topological_ordering
         self.partition = partition
+        self.edges = edges
+    
+    def lift(TODO):
+        # TODO
+    
+    def project(TODO):
+        # TODO
