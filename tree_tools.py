@@ -140,4 +140,3 @@ def total_variation(distribution_1, distribution_2):
         total_variation += np.abs(distribution_1[k] - distribution_2[k])
     return total_variation
 ##########################
- 
