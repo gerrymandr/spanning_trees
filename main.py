@@ -146,13 +146,13 @@ then dynamically when doing the tree walk...
 
 #parts = explore_random(40,1,2, pictures = True, divide_and_conquer = True, equi = False, graph_type = "grid", delta = .2)
 #parts = explore_random(nx.grid_graph([120,120]),1,12, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
-
-graph = nx.grid_graph([40, 40])
-for vertex in graph:
-    graph.nodes[vertex]["geopos"] = vertex
-    graph.nodes[vertex]["POP10"] = 1
-
-parts = explore_random(graph,1,2, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
+#
+#graph = nx.grid_graph([40, 40])
+#for vertex in graph:
+#    graph.nodes[vertex]["geopos"] = vertex
+#    graph.nodes[vertex]["POP10"] = 1
+#
+#parts = explore_random(graph,1,2, pictures = True, divide_and_conquer = False, equi = False, delta = .1)
 #check_delta_equi_split([len(x) for x in parts[0]], .01)
 #explore_walk(8,4)
 #

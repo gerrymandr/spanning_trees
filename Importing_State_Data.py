@@ -49,7 +49,7 @@ import matplotlib.pyplot as plt
 #print(len(graph))
 #
 #
-parts = explore_random(graph, 10, 8, pictures = True, divide_and_conquer=False,with_walk = False, delta = .05)
+parts = explore_random(graph, 2, 2, pictures = True, divide_and_conquer=False,with_walk = False, delta = .05)
 
 #populations = [total_pop]
 
