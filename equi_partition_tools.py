@@ -10,7 +10,6 @@ Created on Wed Jul  4 11:42:30 2018
 import networkx as nx
 import numpy as np
 import random
-
 #def equi_score_tree_edge_pair(G,T,e):
 #    T.remove_edges_from([e])
 #    components = list(nx.connected_components(T))
@@ -72,16 +71,17 @@ def almost_equi_split(tree, num_blocks, delta):
         update_weights(tree, edge)
     return found_edges 
 
-def check_delta_equi_split(subgraph_sizes, delta = .01):
-    '''returns True if all ratios of sizes are all within 1 + delta
-    :subgraph_sizes: list of sizes
-    '''
 
-    for i in range(len(subgraph_sizes)):
-        for j in range(i, len(subgraph_sizes)):
-            if subgraph_sizes[i]/subgraph_sizes[j] > 1 + delta:
-                return False
-    return True
+#def check_delta_equi_split(subgraph_sizes, delta = .01):
+#    '''returns True if all ratios of sizes are all within 1 + delta
+#    :subgraph_sizes: list of sizes
+#    '''
+#
+#    for i in range(len(subgraph_sizes)):
+#        for j in range(i, len(subgraph_sizes)):
+#            if subgraph_sizes[i]/subgraph_sizes[j] > 1 + delta:
+#                return False
+#    return True
 
 def update_weights(tree, edge):
     '''update the weights of a graph after selecting an edge to cut

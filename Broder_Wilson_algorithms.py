@@ -126,17 +126,35 @@ def loop_erasure(trip):
 
 ############Non Uniform Spanning Tree Generation:
     
-def random_greedy(graph):
+def random_greedy_tree(graph):
     '''This uses prims algorithm with a random weighting to make a tree. 
-    This is  slow.
+    [This is  slow. Why? Because you are implemneting it poorly. The following is better
+    the key point is to build up seperate trees, and observe that we only get cycles
+    if we are trying to connect the same component ot itself.
     
     '''
     graph_edges = list(graph.edges())
     random.shuffle(graph_edges)
-    tree = nx.Graph()
+    components = [nx.subgraph(graph, [x]) for x in graph.nodes()]
     for edge in graph_edges:
-        tree.add_edge(edge[0], edge[1])
-        if not nx.is_forest(tree):
-            tree.remove_edge(edge[0], edge[1])
+        wont_add = True
+        for tree in components:
+            if ((edge[0] in tree.nodes()) and not (edge[1] in tree.nodes())):
+                for other_tree in components:
+                    if edge[1] in other_tree.nodes():
+                        #print("merging", tree.nodes(), other_tree.nodes(), edge)
+                        new_tree_add = nx.union(tree, other_tree)
+                        new_tree_add.add_edge(edge[0], edge[1])
+                        tree_remove = tree
+                        other_tree_remove = other_tree
+                        wont_add = False
+        if wont_add == False:
+            components.remove(tree_remove)
+            components.remove(other_tree_remove)
+            components.append(new_tree_add)
+    tree = components[0]
     return tree
-
+#
+#graph = nx.grid_graph([100,100])
+#tree_g = random_greedy_tree(graph)
+#tree_w= random_spanning_tree_wilson(graph)
