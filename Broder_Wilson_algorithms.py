@@ -76,7 +76,7 @@ def random_spanning_tree_wilson(graph):
     # Adding nodes that inherit the attributes from the original graph
     
     
-    for node in graph.nodes:
+    for node in graph.nodes():
         node_attributes = list(graph.nodes[node].keys())
         tree.add_node(node)
         for attr in node_attributes:

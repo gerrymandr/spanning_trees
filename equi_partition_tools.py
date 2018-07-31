@@ -71,7 +71,7 @@ def almost_equi_split(tree, num_blocks, delta):
         update_weights(tree, edge)
     return found_edges 
 
-
+#
 #def check_delta_equi_split(subgraph_sizes, delta = .01):
 #    '''returns True if all ratios of sizes are all within 1 + delta
 #    :subgraph_sizes: list of sizes

@@ -8,7 +8,7 @@ Created on Fri Jul  6 17:32:53 2018
 from walk_tools import equi_shadow_walk
 import networkx as nx
 from tree_sampling_tools import random_equi_partitions, random_spanning_tree, random_spanning_tree_wilson, random_equi_partitions_fast, random_almost_equi_partitions_fast, random_almost_equi_partitions, random_almost_equi_partitions_with_walk, random_almost_equi_partitions_fast_with_walk
-from equi_partition_tools import check_delta_equi_split
+#from equi_partition_tools import check_delta_equi_split
 from visualization_tools import visualize_partition, visualize_partition_with_populations
 import numpy as np
 
@@ -100,11 +100,11 @@ def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size
         
      
     
-#graph = nx.grid_graph([50,50])
+graph = nx.grid_graph([50,50])
 #tree_1 = random_spanning_tree(graph)
 #tree_2 = random_spanning_tree_wilson(graph)    
 
-#test_fast_with_walk(120, 2, 0.01, "Broder", 1000)
+#test_fast_with_walk(120, 2, 0.01, "Wilson", 1000)
 
 '''
 Observations: 

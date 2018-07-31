@@ -8,7 +8,7 @@ Created on Wed Jul  4 11:43:31 2018
 #####For creating a spanning tree
 import networkx as nx
 import random
-from equi_partition_tools import equi_split, almost_equi_split, check_delta_equi_split
+from equi_partition_tools import equi_split, almost_equi_split
 from projection_tools import remove_edges_map
 from walk_tools import propose_step, propose_Broder_step
 from Broder_Wilson_algorithms import random_spanning_tree_wilson, random_spanning_tree

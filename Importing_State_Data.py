@@ -10,7 +10,7 @@ from main import explore_random, total_pop
 import json
 import networkx as nx
 
-state = "55"
+state = "28"
 
 with open("../vtd-adjacency-graphs/vtd-adjacency-graphs/"+str(state)+"/rook.json") as f:
     data = json.load(f)
@@ -49,7 +49,12 @@ import matplotlib.pyplot as plt
 #print(len(graph))
 #
 #
-parts = explore_random(graph, 2, 2, pictures = True, divide_and_conquer=False,with_walk = False, delta = .005)
+#graph = nx.grid_graph([30,30])
+#graph = nx.grid_graph([40, 40])
+#for vertex in graph:
+#    graph.nodes[vertex]["geopos"] = vertex
+#    graph.nodes[vertex]["POP10"] = 1
+parts = explore_random(graph, 4, 2, pictures = True, divide_and_conquer=False,with_walk = False, delta = .005)
 
 #populations = [total_pop]
 
