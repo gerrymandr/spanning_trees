@@ -45,6 +45,12 @@ def random_split(graph, tree, num_blocks, delta):
         
     return ratios
 
+def acceptable(weight_of_sub_arb, acceptable_sizes):
+    for interval in acceptable_sizes:
+        if ((weight_of_sub_arb >= interval[0]) and (weight_of_sub_arb <= interval[1])):
+            return True
+    return False
+
 def random_split_no_delta(graph, tree, num_blocks, delta):
     was_good = False
     while was_good == False:
@@ -58,15 +64,33 @@ def random_split_no_delta(graph, tree, num_blocks, delta):
         
         acceptable_nodes = list(tree.nodes())
         acceptable_nodes.remove(tree.graph["root"])
-        delta = .4  
+        delta = .1
         helper_list = copy.deepcopy(acceptable_nodes)
-        #This is probs not the efficient way to do this...
-        #We can also probably remove more edges than just this
+        acceptable_sizes = [ [ m * (ideal_weight* ( 1 - delta)), m* (ideal_weight *(1 + delta))] for m in range(1,num_blocks)]
+        
+        '''The way to look at the acceptable sizes is as follows:
+           
+           1) We have a list of acceptable sizes for each district
+    2) Thus, we havea  list of acceptable sizes for each subtree, formed in the following way:
+    
+    A weight (for a subtree) is acceptable iff there is a m so that its weight is the union of m pieces of weight ideal +- delta.
+    
+    That is, if it's weight is in [m (ideal - delta) , m (ideal + delta)] for some m.
+    
+    For any given vertex,we have access to the weight of its sub arborescance.
+    So we write a helper function that determines if that subarborescance is acceptable or not.
+    
+    Sanity check: The case we are checking below, i.e. leaves too big or too small, amounts to the case m = 1 and num_blocks - 1
+    
+    The heuristic is that we pick delta small enough so that there is no overlap between these regions for different m.'''
+        
         for vertex in helper_list:
-            if tree.node[vertex]["weight"] < ideal_weight* ( 1- delta):
+            if not acceptable(tree.node[vertex]["weight"], acceptable_sizes):
                 acceptable_nodes.remove(vertex)
-            if tree.node[vertex]["weight"] > ideal_weight*(num_blocks - 1 + delta):
-                acceptable_nodes.remove(vertex)
+#            if tree.node[vertex]["weight"] < ideal_weight* ( 1- delta):
+#                acceptable_nodes.remove(vertex)
+#            if tree.node[vertex]["weight"] > ideal_weight*(num_blocks - 1 + delta):
+#                acceptable_nodes.remove(vertex)
         #print([tree.node[x]["weight"] for x in acceptable_nodes])
                 
         
