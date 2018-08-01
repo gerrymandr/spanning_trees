@@ -61,6 +61,7 @@ def random_split_no_delta(graph, tree, num_blocks, delta):
         delta = .4  
         helper_list = copy.deepcopy(acceptable_nodes)
         #This is probs not the efficient way to do this...
+        #We can also probably remove more edges than just this
         for vertex in helper_list:
             if tree.node[vertex]["weight"] < ideal_weight* ( 1- delta):
                 acceptable_nodes.remove(vertex)
@@ -72,22 +73,26 @@ def random_split_no_delta(graph, tree, num_blocks, delta):
         vertices = random.sample(acceptable_nodes, num_blocks -1)
         
         
-        was_good= checker(tree,vertices, ideal_weight, delta)
-        edges = [list(tree.out_edges(x))[0] for x in vertices]
-        partition = remove_edges_map(graph, tree, edges) 
-        
-        ratios = []
-        for block in partition:
-            block_pop = np.sum( [tree.nodes[x]["POP10"] for x in block.nodes()])
-            ratios.append( block_pop / ideal_weight)
+        was_good= checker(tree,vertices, ideal_weight, delta, total_population)
+    edges = [list(tree.out_edges(x))[0] for x in vertices]
+    partition = remove_edges_map(graph, tree, edges) 
+    
+    ratios = []
+    for block in partition:
+        block_pop = np.sum( [tree.nodes[x]["POP10"] for x in block.nodes()])
+        ratios.append( block_pop / ideal_weight)
+    
+    print(ratios)
         
     return ratios 
 
-def checker(tree, chosen_vertices, ideal_weight, delta):
+def checker(tree, chosen_vertices, ideal_weight, delta, total):
     '''return True or False depending on whether the choice of vertices producesa
     delta equipartition. [for each vertex, we remove the unique edge coing out of it]
     
     '''
+    #Why is this letting in some very large partitions?
+    
     minima = copy.deepcopy(chosen_vertices)
     for vertex in chosen_vertices:
         above_vertex = immediately_above(tree, vertex, chosen_vertices)
@@ -102,7 +107,7 @@ def checker(tree, chosen_vertices, ideal_weight, delta):
             return False
     
     for vertex in minima:
-        weight = tree.node[vertex]["weight"]
+        weight  = total - tree.node[vertex]["weight"]
         if (weight/ideal_weight) >= 1 + delta:
             return False
         if (weight/ideal_weight) <= 1 - delta:
