@@ -51,53 +51,98 @@ def acceptable(weight_of_sub_arb, acceptable_sizes):
             return True
     return False
 
-def random_split_no_delta(graph, tree, num_blocks, delta):
-    was_good = False
-    while was_good == False:
-        num_blocks = 4
-        pop = [tree.nodes[i]["POP10"] for i in tree.nodes()]
-        total_population = np.sum(pop)
-        
-        ideal_weight = total_population/ num_blocks
-        
-        label_weights(tree)
-        
-        acceptable_nodes = list(tree.nodes())
-        acceptable_nodes.remove(tree.graph["root"])
-        delta = .1
-        helper_list = copy.deepcopy(acceptable_nodes)
-        acceptable_sizes = [ [ m * (ideal_weight* ( 1 - delta)), m* (ideal_weight *(1 + delta))] for m in range(1,num_blocks)]
-        
-        '''The way to look at the acceptable sizes is as follows:
-           
-           1) We have a list of acceptable sizes for each district
-    2) Thus, we havea  list of acceptable sizes for each subtree, formed in the following way:
+def num_leaves(tree):
+    #Returns the number of leaves that a tree has
+    return np.sum([1 for x in tree.nodes() if tree.degree(x) ==1])
+
+def component_sampler(components, num_blocks):
+    '''
+    #Takes the components of the subforest produced
+    #And accepts a fewer than numleaves nodes from each components
+    #In total goal is to pick num_blocks - 1 nodes
     
-    A weight (for a subtree) is acceptable iff there is a m so that its weight is the union of m pieces of weight ideal +- delta.
+    #the goal is also to pick the tuples with the correct probabilities...
+    #Do we always need to pick 1 from each components/
     
-    That is, if it's weight is in [m (ideal - delta) , m (ideal + delta)] for some m.
+    #IMPORTANT QUESTION: Make sure this samples uniformly!
     
-    For any given vertex,we have access to the weight of its sub arborescance.
-    So we write a helper function that determines if that subarborescance is acceptable or not.
+    #We have m bins,and n balls. Each bin has a number k_i, and we allow k_i balls to be put in bin i. We want to sample uniformly from among all ways to place the n balls.
     
-    Sanity check: The case we are checking below, i.e. leaves too big or too small, amounts to the case m = 1 and num_blocks - 1
-    
-    The heuristic is that we pick delta small enough so that there is no overlap between these regions for different m.'''
-        
-        for vertex in helper_list:
-            if not acceptable(tree.node[vertex]["weight"], acceptable_sizes):
-                acceptable_nodes.remove(vertex)
-#            if tree.node[vertex]["weight"] < ideal_weight* ( 1- delta):
-#                acceptable_nodes.remove(vertex)
-#            if tree.node[vertex]["weight"] > ideal_weight*(num_blocks - 1 + delta):
-#                acceptable_nodes.remove(vertex)
-        #print([tree.node[x]["weight"] for x in acceptable_nodes])
+    this can be said in these terms: we are trying to sample rank n elements from the partition matroid corresponding to the bins and the numbers k_i.
+    '''
+    random.shuffle(components)
+    total = 0
+    list_of_vertices = []
+    unexhausted = []
+    for component in components:
+        if total < num_blocks - 1:
+            leaves = num_leaves(component)
+            if leaves == 0:
+                #This is the case of a single vertex
+                total += 1
+                list_of_vertices.append(list(component.nodes())[0])
+            else:
+                num_to_pick = random.choice(range(1, min(leaves - 1, num_blocks - 1 - total) + 1))
+                total += num_to_pick
+                list_of_vertices += random.sample(list(component.nodes()), num_to_pick)
+                if num_to_pick < leaves - 1:
+                    unexhausted.append(component)
                 
+    if total < num_blocks - 1:
+        print("Add the bit using the unexhausted components")
         
-        vertices = random.sample(acceptable_nodes, num_blocks -1)
-        
-        
+    #I think it's possible for some path components to have no-one in them
+    #Is this UNIFORM??????
+    
+    #This doesn't work... what if itdoesn't pick 
+    return list_of_vertices
+    
+
+def random_split_fast(graph, tree, num_blocks, delta, allowed_counts = 100):
+    pop = [tree.nodes[i]["POP10"] for i in tree.nodes()]
+    total_population = np.sum(pop)
+    
+    ideal_weight = total_population/ num_blocks
+    
+    label_weights(tree)
+    
+    acceptable_nodes = list(tree.nodes())
+    acceptable_nodes.remove(tree.graph["root"])
+    helper_list = copy.deepcopy(acceptable_nodes)
+    acceptable_sizes = [ [ m* (ideal_weight* ( 1 - delta)), m* (ideal_weight *(1 + delta))] for m in range(1,num_blocks)]
+    ##Need to work out what this is...
+    
+    '''
+A weight (for a subtree) is acceptable iff it's weight is in [m (ideal - delta) , m (ideal + delta)] for some m. Heuristically, take delta small '''
+
+    
+    for vertex in helper_list:
+        if not acceptable(tree.node[vertex]["weight"], acceptable_sizes):
+            acceptable_nodes.remove(vertex)
+
+    sample_subforest = nx.subgraph(tree, acceptable_nodes)
+    sample_subforest = sample_subforest.to_undirected()
+    components = list(nx.connected_component_subgraphs(sample_subforest))
+    [num_leaves(x) for x in components]
+    test_tree(sample_subforest)
+    if len(acceptable_nodes) < num_blocks - 1:
+        print("bad tree")
+        #return False
+    #Nextthing to add: only choose one edge from each component of acceptable_nodes[tree] induced subtree... this doesn't work, unless the component is a path.... there are simple examples on Y graphs.
+    #What does work is that we can only ever choose k-1 nodes from a subtree that has k leaves... there isn't a unique number..
+    #If its a path, do we always need to pick one from it?
+    
+    
+    was_good = False
+    counter = 0
+    while (was_good == False) and (counter < allowed_counts):
+
+        vertices = component_sampler(components, num_blocks)
+        counter += 1
         was_good= checker(tree,vertices, ideal_weight, delta, total_population)
+    print(checker(tree, vertices, ideal_weight, delta, total_population))
+    print("counter:", counter)
+
     edges = [list(tree.out_edges(x))[0] for x in vertices]
     partition = remove_edges_map(graph, tree, edges) 
     
@@ -105,7 +150,7 @@ def random_split_no_delta(graph, tree, num_blocks, delta):
     for block in partition:
         block_pop = np.sum( [tree.nodes[x]["POP10"] for x in block.nodes()])
         ratios.append( block_pop / ideal_weight)
-    
+        
     print(ratios)
         
     return ratios 
@@ -116,26 +161,24 @@ def checker(tree, chosen_vertices, ideal_weight, delta, total):
     
     '''
     #Why is this letting in some very large partitions?
-    
-    minima = copy.deepcopy(chosen_vertices)
+    #Need to add root to chosen_vertices in order tosee the bottom piece.
+
     for vertex in chosen_vertices:
         above_vertex = immediately_above(tree, vertex, chosen_vertices)
         weight =tree.node[vertex]["weight"] - np.sum( [tree.node[x]["weight"] for x in above_vertex])
-        for larger_vertex in above_vertex:
-            if larger_vertex in minima:
-                minima.remove(larger_vertex)
         #print(weight, len(above_vertex))
         if (weight/ideal_weight) >= 1 + delta:
             return False
         if (weight/ideal_weight) <= 1 - delta:
             return False
-    
-    for vertex in minima:
-        weight  = total - tree.node[vertex]["weight"]
-        if (weight/ideal_weight) >= 1 + delta:
-            return False
-        if (weight/ideal_weight) <= 1 - delta:
-            return False
+    vertex = tree.graph["root"]
+    above_vertex = immediately_above(tree, vertex, chosen_vertices)
+    weight =tree.node[vertex]["weight"] - np.sum( [tree.node[x]["weight"] for x in above_vertex])
+    #print(weight, len(above_vertex))
+    if (weight/ideal_weight) >= 1 + delta:
+        return False
+    if (weight/ideal_weight) <= 1 - delta:
+        return False
     return True
     
 
@@ -212,7 +255,7 @@ def build_geq(tree, ordered_vertices):
                 if is_geq:
                     M[index_1, index_2] = 1
                 else:
-                    M[index_2, index_1] = 1
+                    M[index_2, index_1] = -1
                 #th
                 
     return M
@@ -251,10 +294,11 @@ M == N
     
 '''
 
-graph= nx.grid_graph([20,20])
+graph= nx.grid_graph([50,50])
 for vertex in graph:
-    graph.nodes[vertex]["POP10"] = 1
+    graph.node[vertex]["POP10"] = 1
 tree = random_spanning_tree_wilson(graph)
+random_split_fast(graph, tree, 4, .1)
 #sample_best = []
 #testing_length= 100
 #for k in range(testing_length):

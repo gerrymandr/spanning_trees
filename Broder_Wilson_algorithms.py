@@ -77,7 +77,7 @@ def random_spanning_tree_wilson(graph):
     
     
     for node in graph.nodes():
-        node_attributes = list(graph.nodes[node].keys())
+        node_attributes = list(graph.node[node].keys())
         tree.add_node(node)
         for attr in node_attributes:
             tree.nodes[node][attr] = graph.nodes[node][attr]
