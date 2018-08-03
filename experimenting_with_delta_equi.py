@@ -12,39 +12,6 @@ from Broder_Wilson_algorithms import random_spanning_tree_wilson, random_greedy_
 import networkx as nx
 import copy
 
-def random_split(graph, tree, num_blocks, delta):
-    
-    #You can make this smarter by preprocessing the set of edges to the much smaller set of allowable edges (using tree weights)
-    #and also forcing the edges to be chosen from their respective intervals only... which cuts down the search space a lot also.
-    
-    pop = [tree.nodes[i]["POP10"] for i in tree.nodes()]
-    total_population = np.sum(pop)
-    
-    ideal_value = total_population/ num_blocks
-    
-    label_weights(tree)
-    okay_weight_nodes = set()
-    non_root_nodes= list(tree.nodes)
-    non_root_nodes.remove(tree.graph["root"])
-    for vertex in non_root_nodes:
-        for j in range(1, num_blocks):
-
-            if abs( tree.nodes[vertex]["weight"] - (ideal_value*j)) < delta:
-                #This isn't really right...
-                okay_weight_nodes.add(vertex)
-    okay_weight_nodes = list(okay_weight_nodes)
-    okay_edges = [list(tree.out_edges(vertex))[0] for vertex in okay_weight_nodes]
-    edges = random.sample(okay_edges, num_blocks - 1)
-    partition = remove_edges_map(graph, tree, edges)
-    
-
-    ratios = []
-    for block in partition:
-        block_pop = np.sum( [tree.nodes[x]["POP10"] for x in block.nodes()])
-        ratios.append( block_pop / ideal_value)
-        
-    return ratios
-
 def acceptable(weight_of_sub_arb, acceptable_sizes):
     for interval in acceptable_sizes:
         if ((weight_of_sub_arb >= interval[0]) and (weight_of_sub_arb <= interval[1])):
@@ -70,6 +37,10 @@ def component_sampler(components, num_blocks):
     
     this can be said in these terms: we are trying to sample rank n elements from the partition matroid corresponding to the bins and the numbers k_i.
     '''
+    
+   # USe this:  https://stats.stackexchange.com/questions/184348/how-to-generate-samples-uniformly-at-random-from-multiple-discrete-variables-sub
+    
+    
     random.shuffle(components)
     total = 0
     list_of_vertices = []
@@ -92,9 +63,6 @@ def component_sampler(components, num_blocks):
         print("Add the bit using the unexhausted components")
         
     #I think it's possible for some path components to have no-one in them
-    #Is this UNIFORM??????
-    
-    #This doesn't work... what if itdoesn't pick 
     return list_of_vertices
     
 
@@ -111,7 +79,7 @@ def random_split_fast(graph, tree, num_blocks, delta, allowed_counts = 100):
     helper_list = copy.deepcopy(acceptable_nodes)
     acceptable_sizes = [ [ m* (ideal_weight* ( 1 - delta)), m* (ideal_weight *(1 + delta))] for m in range(1,num_blocks)]
     ##Need to work out what this is...
-    
+   # print("Can we get some elimination test based on not all the intervals appearing")
     '''
 A weight (for a subtree) is acceptable iff it's weight is in [m (ideal - delta) , m (ideal + delta)] for some m. Heuristically, take delta small '''
 
@@ -124,10 +92,11 @@ A weight (for a subtree) is acceptable iff it's weight is in [m (ideal - delta) 
     sample_subforest = sample_subforest.to_undirected()
     components = list(nx.connected_component_subgraphs(sample_subforest))
     [num_leaves(x) for x in components]
-    test_tree(sample_subforest)
+    #test_tree(sample_subforest)
     if len(acceptable_nodes) < num_blocks - 1:
         print("bad tree")
-        #return False
+        return False
+    
     #Nextthing to add: only choose one edge from each component of acceptable_nodes[tree] induced subtree... this doesn't work, unless the component is a path.... there are simple examples on Y graphs.
     #What does work is that we can only ever choose k-1 nodes from a subtree that has k leaves... there isn't a unique number..
     #If its a path, do we always need to pick one from it?
@@ -140,6 +109,8 @@ A weight (for a subtree) is acceptable iff it's weight is in [m (ideal - delta) 
         vertices = component_sampler(components, num_blocks)
         counter += 1
         was_good= checker(tree,vertices, ideal_weight, delta, total_population)
+    if counter >= allowed_counts:
+        return False
     print(checker(tree, vertices, ideal_weight, delta, total_population))
     print("counter:", counter)
 
@@ -294,32 +265,9 @@ M == N
     
 '''
 
-graph= nx.grid_graph([50,50])
+graph= nx.grid_graph([160,160])
 for vertex in graph:
     graph.node[vertex]["POP10"] = 1
 tree = random_spanning_tree_wilson(graph)
-random_split_fast(graph, tree, 4, .1)
-#sample_best = []
-#testing_length= 100
-#for k in range(testing_length):
-#        
-#    tree = random_spanning_tree_wilson(graph)
-#    #tree = random_greedy_tree(graph)
-#    num_blocks = 4
-#    delta = 10000
-#    #ratio_list = []
-#    #for i in range(1000):
-#    #    ratios = random_split(graph, tree, 4)
-#    #    ratio_list.append( abs( 1 - np.max([ abs( np.max(ratios) - 1), abs(1 - np.min(ratios))] )) )
-#    #np.min(ratio_list)
-#    
-#    ratio_list = []
-#    ratios = random_split(graph, tree, num_blocks, delta)
-#    ratio_list.append( abs( np.max([ abs( np.max(ratios) - 1), abs(1 - np.min(ratios))] )) )
-#    counter = 0
-#    while (np.min(ratio_list) > .1) and (counter < 1000):
-#        ratios = random_split_no_delta(graph, tree, num_blocks)
-#        ratio_list.append( np.max([ abs( np.max(ratios) - 1), abs(1 - np.min(ratios))] ) )
-#        counter += 1
-#    print(len(ratio_list), min(ratio_list))
-#    sample_best.append(min(ratio_list))
+
+random_split_fast(graph, tree, 8, .1)
