@@ -11,6 +11,7 @@ import numpy as np
 from Broder_Wilson_algorithms import random_spanning_tree_wilson, random_greedy_tree
 import networkx as nx
 import copy
+from rankrsampler_testing import sampler
 
 def acceptable(weight_of_sub_arb, acceptable_sizes):
     for interval in acceptable_sizes:
@@ -24,45 +25,32 @@ def num_leaves(tree):
 
 def component_sampler(components, num_blocks):
     '''
+    Caveat: We need to be in the regime where delta is so small that the leaf counting heuristic is true.
+    
+    
+    
     #Takes the components of the subforest produced
     #And accepts a fewer than numleaves nodes from each components
     #In total goal is to pick num_blocks - 1 nodes
-    
-    #the goal is also to pick the tuples with the correct probabilities...
-    #Do we always need to pick 1 from each components/
-    
-    #IMPORTANT QUESTION: Make sure this samples uniformly!
-    
-    #We have m bins,and n balls. Each bin has a number k_i, and we allow k_i balls to be put in bin i. We want to sample uniformly from among all ways to place the n balls.
-    
-    this can be said in these terms: we are trying to sample rank n elements from the partition matroid corresponding to the bins and the numbers k_i.
     '''
     
    # USe this:  https://stats.stackexchange.com/questions/184348/how-to-generate-samples-uniformly-at-random-from-multiple-discrete-variables-sub
     
-    
-    random.shuffle(components)
-    total = 0
     list_of_vertices = []
-    unexhausted = []
+    leaf_constraints = []
     for component in components:
-        if total < num_blocks - 1:
-            leaves = num_leaves(component)
-            if leaves == 0:
-                #This is the case of a single vertex
-                total += 1
-                list_of_vertices.append(list(component.nodes())[0])
-            else:
-                num_to_pick = random.choice(range(1, min(leaves - 1, num_blocks - 1 - total) + 1))
-                total += num_to_pick
-                list_of_vertices += random.sample(list(component.nodes()), num_to_pick)
-                if num_to_pick < leaves - 1:
-                    unexhausted.append(component)
-                
-    if total < num_blocks - 1:
-        print("Add the bit using the unexhausted components")
+        leaves = num_leaves(component)
+        if leaves > 0:
+            leaf_constraints.append(int(num_leaves(component) - 1))
+        else:
+            leaf_constraints.append(1)
+    if np.sum(leaf_constraints) < num_blocks - 1:
+        return False
         
-    #I think it's possible for some path components to have no-one in them
+    size_marginals = sampler(leaf_constraints, num_blocks - 1)
+    for i in range(len(components)):
+        list_of_vertices += random.sample(components[i].nodes(), size_marginals[i])
+                
     return list_of_vertices
     
 
@@ -91,7 +79,6 @@ A weight (for a subtree) is acceptable iff it's weight is in [m (ideal - delta) 
     sample_subforest = nx.subgraph(tree, acceptable_nodes)
     sample_subforest = sample_subforest.to_undirected()
     components = list(nx.connected_component_subgraphs(sample_subforest))
-    [num_leaves(x) for x in components]
     #test_tree(sample_subforest)
     if len(acceptable_nodes) < num_blocks - 1:
         print("bad tree")
@@ -107,10 +94,13 @@ A weight (for a subtree) is acceptable iff it's weight is in [m (ideal - delta) 
     while (was_good == False) and (counter < allowed_counts):
 
         vertices = component_sampler(components, num_blocks)
+        if vertices == False:
+            return False
+            #This is the case when the allowable set isn't big enough support a partition... this relies on the assumption that delta is small so that no allowable interval of nodes can contain a district...
         counter += 1
         was_good= checker(tree,vertices, ideal_weight, delta, total_population)
     if counter >= allowed_counts:
-        return False
+        return "FailedToFind"
     print(checker(tree, vertices, ideal_weight, delta, total_population))
     print("counter:", counter)
 
@@ -192,7 +182,8 @@ def immediately_above(tree, base_vertex, chosen_vertices):
     for eachvertex in list_of_vertices_above_base:
         for comparevertex in list_of_vertices_above_base:
             if geq(tree, eachvertex, comparevertex):
-                list_of_vertices_above_base.remove(eachvertex)
+                if eachvertex in list_of_vertices_above_base:
+                    list_of_vertices_above_base.remove(eachvertex)
         #May need to check this because we are modifying behavior...
     #This is $k^2n$, which is fine... we can afford linear in size of tree, and quadratic in number of edges... perhaps.
     return list_of_vertices_above_base
@@ -265,9 +256,10 @@ M == N
     
 '''
 
-graph= nx.grid_graph([160,160])
+graph= nx.grid_graph([80,80])
 for vertex in graph:
     graph.node[vertex]["POP10"] = 1
-tree = random_spanning_tree_wilson(graph)
-
-random_split_fast(graph, tree, 8, .1)
+    
+for i in range(20):
+    tree = random_spanning_tree_wilson(graph)
+    random_split_fast(graph, tree, 4, .1,40)
