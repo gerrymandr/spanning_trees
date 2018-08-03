@@ -99,8 +99,15 @@ def test_fast_with_walk(graph_size, num_blocks, delta, step = "Basis", jump_size
         print([len(x) for x in partition])
         
      
-    
-graph = nx.grid_graph([50,50])
+cuts = 32
+graph = nx.grid_graph([10*cuts,10*cuts])
+for vertex in graph:
+    graph.nodes[vertex]["geopos"] = vertex
+    graph.nodes[vertex]["POP10"] = 1
+partition = explore_random(graph, 1, cuts, pictures = True, divide_and_conquer = True, equi = False, with_walk = False, delta = .1)[0]
+
+
+
 #tree_1 = random_spanning_tree(graph)
 #tree_2 = random_spanning_tree_wilson(graph)    
 

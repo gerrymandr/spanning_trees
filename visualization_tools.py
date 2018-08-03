@@ -28,7 +28,7 @@ def visualize_partition(graph, partition, color_likelihood = False):
     edge_colors = [graph.edges[edge]["tree"] for edge in graph.edges()]
     nx.draw(graph, pos=nx.get_node_attributes(graph, 'pos'), cmap=plt.get_cmap('jet'), node_color=node_colors, edge_color=edge_colors, node_size = 20, width = .5)
     #plt.text(10, 10, str(populations))
-    plt.savefig(name)
+    plt.savefig(name, format='svgz', dpi= 10000)
     
 def visualize_partition_with_likelihoods(graph, partition, color_likelihood = False):
     for i in range(len(partition)):

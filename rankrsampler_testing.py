@@ -58,15 +58,16 @@ PART II:
 
 Now we use the data constructed in part I to compute the marginals. This is simple:
     
-Notation: ind refers to the $f \leq d$ condition -- it is independence in the partition matroid. B refers to the total amount, as before.
+Here $P_{[i],B}$ refers to drawing a function uniformly from $F_{[i], B}4
     
-Claim: $P(n_I = n | B, ind) = \frac{ |F_{[i - 1], B - n}| }{|F_{[i], B}|}$.
+Claim: $P_{[i],B}(f(i) = n ) = \frac{ |F_{[i - 1], B - n}| }{|F_{[i], B}|}$.
+Proof: This follows easily from the observation that $\{ f \in F_{[i], B} | f(i) = n\} \cong \{ f \in F_{[i-1], B-n}}$.'
 
 PART II:
     
 Finally, we use part II to samplefrom the uniform distribution on $F_{I, B, d} \{ f : I \to \mathbb{N}| \sum_{i \in I} f(i) = B , f \leq d\}$.
 
-To do this, we sample inductively backwards... using the chain rule to justify the final outcome...
+To do this, we sample inductively backwards:
     
 '''
 
