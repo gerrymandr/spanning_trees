@@ -51,18 +51,25 @@ def component_sampler(components, num_blocks):
     return list_of_vertices
     
 
-def random_split_fast(graph, tree, num_blocks, delta, allowed_counts = 100):
+def random_split_fast(graph, tree, num_blocks, delta, allowed_vector = False, allowed_counts = 100):
+    
+    
+    
     pop = [tree.nodes[i]["POP10"] for i in tree.nodes()]
     total_population = np.sum(pop)
     
     ideal_weight = total_population/ num_blocks
     
     label_weights(tree)
+
     
     acceptable_nodes = list(tree.nodes())
     acceptable_nodes.remove(tree.graph["root"])
     helper_list = copy.deepcopy(acceptable_nodes)
+    
+        
     acceptable_sizes = [ [ m* (ideal_weight* ( 1 - delta)), m* (ideal_weight *(1 + delta))] for m in range(1,num_blocks)]
+
 
     '''
 A weight (for a subtree) is acceptable iff it's weight is in [m (ideal - delta) , m (ideal + delta)] for some m. Heuristically, take delta small '''

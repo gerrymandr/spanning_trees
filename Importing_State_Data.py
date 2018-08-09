@@ -54,7 +54,7 @@ import matplotlib.pyplot as plt
 #for vertex in graph:
 #    graph.nodes[vertex]["geopos"] = vertex
 #    graph.nodes[vertex]["POP10"] = 1
-parts = explore_random(graph, 4, 2, pictures = True, divide_and_conquer=False,with_walk = False, delta = .1)
+parts = explore_random(graph, 10, 2, pictures = True, divide_and_conquer=False,with_walk = False, delta = .1)
 
 #populations = [total_pop]
 

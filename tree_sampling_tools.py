@@ -12,6 +12,7 @@ from equi_partition_tools import equi_split, almost_equi_split
 from projection_tools import remove_edges_map
 from walk_tools import propose_step, propose_Broder_step
 from Broder_Wilson_algorithms import random_spanning_tree_wilson, random_spanning_tree
+import numpy as np
 #################
 '''
 
@@ -36,9 +37,14 @@ def random_equi_partitions(graph, num_partitions, num_blocks, algorithm = "Wilso
     while len(found_partitions) < num_partitions:
         counter += 1
         if algorithm == "Broder":
-            tree = random_spanning_tree(graph)
+            tree = random_spanning_tree(graph)    
         if algorithm == "Wilson":
             tree = random_spanning_tree_wilson(graph)
+        if algorithm == "MST":
+            for edge in graph.edges():
+                graph.edges[edge]["weight"] = np.random.uniform(0,1)
+            #Do we need to reset this each time?
+            tree = nx.minimum_spanning_tree(graph)
         edge_list = equi_split(tree, num_blocks)
         #edge_list will return None if there is no equi_split
         if edge_list != None:
