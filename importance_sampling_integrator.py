@@ -81,32 +81,62 @@ def estimate_number_partitions(graph, partition_list):
     return integrate(partition_list, constant_function)
 
 
+def expectation(graph, list_of_partitions, function):
+    #This computes expectations against the tree measure
+
+    total = 0
+    total_likelihood = 0
+    for partition in list_of_partitions:
+        total += function(partition) * partition.likelihood
+        total_likelihood += partition.likelihood
+    return total / total_likelihood
+
+def make_histogram(graph, list_of_partitions, function):
+    values = {}
+    total_likelihood = 0
+    for partition in list_of_partitions:
+        values[function(partition)] = 0
+        total_likelihood += partition.likelihood
+    for partition in list_of_partitions:
+        values[function(partition)] += function(partition)*partition.likelihood / total_likelihood
+    return values
 
 
-number_trees = 3000
-graph = nx.grid_graph([10,10])
+number_trees = 10000
+graph = nx.grid_graph([25,25])
+partition_list = make_partition_list(graph, number_trees)
+expectation(graph, partition_list, cut_size)
+hist = make_histogram(graph, partition_list, cut_size)
+plt.bar(list(hist.keys()), hist.values(), color='g')
+plt.show()
 
-#For 10x10 grid, estimated sample space size using 30000 trees is:
-sample_size = 3.14529733509e+12
+#Here's a practical issue - the numbers here are literally too big to do importance sampling with.
+
+def test():
+    number_trees = 10
+    graph = nx.grid_graph([10,10])
     
-
-total_number_trees_edges_pairs = np.exp(log_number_trees(graph))*(len(graph.nodes()) - 1)
+    #For 10x10 grid, estimated sample space size using 30000 trees is:
+    sample_size = 3.14529733509e+12
+        
     
-ongoing_partition_list = []
-for i in range(10):
-    partition_list = make_partition_list(graph, number_trees)
-    for partition in partition_list:
-        partition.estimated_sample_space_size = sample_size
-    ongoing_partition_list += partition_list
-    #cut_total = integrate(partition_list, cut_size)
-    #size_total = integrate(partition_list, constant_function)
-    #likelihood = integrate(partition_list, likelihood_function)
-    #print(total_number_trees_edges_pairs / size_total)
-    #This computes the average likelihood T_A T_B cut(A,B)
-    print(integrate(partition_list, total_variation))
-    #print(cut_total/ size_total)
-    #print(cut_total, size_total)
-    
-print(estimate_number_partitions(graph, ongoing_partition_list))
+    total_number_trees_edges_pairs = np.exp(log_number_trees(graph))*(len(graph.nodes()) - 1)
+        
+    ongoing_partition_list = []
+    for i in range(10):
+        partition_list = make_partition_list(graph, number_trees)
+        for partition in partition_list:
+            partition.estimated_sample_space_size = sample_size
+        ongoing_partition_list += partition_list
+        #cut_total = integrate(partition_list, cut_size)
+        #size_total = integrate(partition_list, constant_function)
+        #likelihood = integrate(partition_list, likelihood_function)
+        #print(total_number_trees_edges_pairs / size_total)
+        #This computes the average likelihood T_A T_B cut(A,B)
+        print(integrate(partition_list, total_variation))
+        #print(cut_total/ size_total)
+        #print(cut_total, size_total)
+        
+    print(estimate_number_partitions(graph, ongoing_partition_list))
 
 #TODO -- figure out how to compute the distribution for divide and conquer
