@@ -81,25 +81,22 @@ def estimate_number_partitions(graph, partition_list):
 
     return integrate(partition_list, constant_function)
 
-#Both of these estimators might be inconsistant. See here: https://stats.stackexchange.com/questions/367534/whats-the-best-estimator-for-expectation-if-we-can-draw-samples-iid-and-we-kn
 def expectation(graph, list_of_partitions, function):
     #This computes expectations against the tree measure
 
     total = 0
-    total_likelihood = 0
     for partition in list_of_partitions:
-        total += function(partition) * partition.likelihood
-        total_likelihood += partition.likelihood
-    return total / total_likelihood
+        total += function(partition)
+    return total / len(list_of_partitions)
 
 def make_histogram(graph, list_of_partitions, function):
     values = {}
     total_likelihood = 0
     for partition in list_of_partitions:
         values[function(partition)] = 0
-        total_likelihood += partition.likelihood
+        total_likelihood += 1
     for partition in list_of_partitions:
-        values[function(partition)] += function(partition)*partition.likelihood / total_likelihood
+        values[function(partition)] += 1 / total_likelihood
     return values
 
 
@@ -142,3 +139,24 @@ def test():
     print(estimate_number_partitions(graph, ongoing_partition_list))
 
 #TODO -- figure out how to compute the distribution for divide and conquer
+#
+##Both of these estimators might be inconsistant. See here: https://stats.stackexchange.com/questions/367534/whats-the-best-estimator-for-expectation-if-we-can-draw-samples-iid-and-we-kn
+#def expectation(graph, list_of_partitions, function):
+#    #This computes expectations against the tree measure
+#
+#    total = 0
+#    total_likelihood = 0
+#    for partition in list_of_partitions:
+#        total += function(partition) * partition.likelihood
+#        total_likelihood += partition.likelihood
+#    return total / total_likelihood
+#
+#def make_histogram(graph, list_of_partitions, function):
+#    values = {}
+#    total_likelihood = 0
+#    for partition in list_of_partitions:
+#        values[function(partition)] = 0
+#        total_likelihood += partition.likelihood
+#    for partition in list_of_partitions:
+#        values[function(partition)] += function(partition)*partition.likelihood / total_likelihood
+#    return values
