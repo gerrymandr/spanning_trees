@@ -44,6 +44,11 @@ def viz(graph):
 def make_rectangle(number_samples, skew):
     return list(zip(np.random.uniform(0,1,number_samples), np.random.uniform(0,skew,number_samples)))
 
+def make_graph(number_samples, skew):
+    sample_rectangle = make_rectangle(number_samples,1)
+    rectangle_graph = points_to_delaunay_graph(sample_rectangle)
+    return rectangle_graph
+
 
 #repititions = 20
 #for number_samples in [100,1000,10000,50000]:
@@ -63,33 +68,52 @@ def make_rectangle(number_samples, skew):
 #    print(np.mean(square_trees), np.std(square_trees))
 #    print("difference:", np.mean(rectangle_trees) - np.mean(square_trees), "total std:", np.std(rectangle_trees) + np.std(square_trees))
     
-square_data = {}
-repititions = 20
-sample_size_set = [100,1000,10000]
-for number_samples in sample_size_set:
-    square_trees = []
-    rectangle_trees = []
-    for i in range(repititions):
-        sample_rectangle = make_rectangle(number_samples,1)           
-        rectangle_graph = points_to_delaunay_graph(sample_rectangle)
-        rectangle_trees.append(log_number_trees(rectangle_graph))
-    square_data[number_samples] =  [ [np.mean(rectangle_trees), np.std(rectangle_trees)] ] 
 
-data = {}
-repititions = 20
-sample_size_set = [100,1000,10000]
-skew_size_set = [10,100]
-for skews in skew_size_set:
-    data[skews] = {}
-    for number_samples in sample_size_set:
-        square_trees = []
-        rectangle_trees = []
-        for i in range(repititions):
-            sample_rectangle = make_rectangle(number_samples,skews)           
-            rectangle_graph = points_to_delaunay_graph(sample_rectangle)
-            rectangle_trees.append(log_number_trees(rectangle_graph))
-        data[skews][number_samples] = [ [ np.mean(rectangle_trees), np.std(rectangle_trees)] ] 
-        
+#repititions = 20
+#for number_samples in [100,1000,10000,50000]:
+#    square_trees = []
+#    rectangle_trees = []
+#    for i in range(repititions):
+#        sample_square = make_rectangle(number_samples, 1)
+#        sample_rectangle = make_rectangle(number_samples,200)
+#        
+#        rectangle_graph = points_to_delaunay_graph(sample_rectangle)
+#        square_graph = points_to_delaunay_graph(sample_square)
+#        #viz(square_graph)
+#        #viz(rectangle_graph)
+#        rectangle_trees.append(log_number_trees(rectangle_graph))
+#        square_trees.append(log_number_trees(square_graph))
+#    print(np.mean(rectangle_trees), np.std(rectangle_trees))
+#    print(np.mean(square_trees), np.std(square_trees))
+#    print("difference:", np.mean(rectangle_trees) - np.mean(square_trees), "total std:", np.std(rectangle_trees) + np.std(square_trees))
+    
+#square_data = {}
+#repititions = 20
+#sample_size_set = [100,1000,10000]
+#for number_samples in sample_size_set:
+#    square_trees = []
+#    rectangle_trees = []
+#    for i in range(repititions):
+#        sample_rectangle = make_rectangle(number_samples,1)           
+#        rectangle_graph = points_to_delaunay_graph(sample_rectangle)
+#        rectangle_trees.append(log_number_trees(rectangle_graph))
+#    square_data[number_samples] =  [ [np.mean(rectangle_trees), np.std(rectangle_trees)] ] 
+#
+#data = {}
+#repititions = 20
+#sample_size_set = [100,1000,10000]
+#skew_size_set = [10,100]
+#for skews in skew_size_set:
+#    data[skews] = {}
+#    for number_samples in sample_size_set:
+#        square_trees = []
+#        rectangle_trees = []
+#        for i in range(repititions):
+#            sample_rectangle = make_rectangle(number_samples,skews)           
+#            rectangle_graph = points_to_delaunay_graph(sample_rectangle)
+#            rectangle_trees.append(log_number_trees(rectangle_graph))
+#        data[skews][number_samples] = [ [ np.mean(rectangle_trees), np.std(rectangle_trees)] ] 
+#        
 
         
         
