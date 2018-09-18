@@ -81,7 +81,7 @@ def estimate_number_partitions(graph, partition_list):
 
     return integrate(partition_list, constant_function)
 
-
+#Both of these estimators might be inconsistant. See here: https://stats.stackexchange.com/questions/367534/whats-the-best-estimator-for-expectation-if-we-can-draw-samples-iid-and-we-kn
 def expectation(graph, list_of_partitions, function):
     #This computes expectations against the tree measure
 
