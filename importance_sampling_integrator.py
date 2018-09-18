@@ -12,7 +12,8 @@ import random
 import networkx as nx
 from tree_tools import log_number_trees
 import numpy as np
-    
+from point_process import make_graph, viz
+
 class partition_class:
     def __init__(self, graph, partition, tree, edge,total_number_trees_edges_pairs):
         self.partition = partition
@@ -104,6 +105,7 @@ def make_histogram(graph, list_of_partitions, function):
 
 number_trees = 10000
 graph = nx.grid_graph([25,25])
+graph = make_graph(400,1)
 partition_list = make_partition_list(graph, number_trees)
 expectation(graph, partition_list, cut_size)
 hist = make_histogram(graph, partition_list, cut_size)
