@@ -99,15 +99,61 @@ def make_histogram(graph, list_of_partitions, function):
         values[function(partition)] += 1 / total_likelihood
     return values
 
+def merge_historgrams(histogram_1, histogram_2):
+    out = {}
+    for key in histogram_1.keys():
+        out[key] = 0
+    for key in histogram_2.keys():
+        out[key] = 0
+    for key in out.keys():
+        if key in histogram_1.keys():
+            out[key] += histogram_1[key]
+        if key in histogram_2.keys():
+            out[key] += histogram_2[key]
+    return out
 
-number_trees = 10000
-graph = nx.grid_graph([25,25])
-graph = make_graph(400,1)
-partition_list = make_partition_list(graph, number_trees)
-expectation(graph, partition_list, cut_size)
-hist = make_histogram(graph, partition_list, cut_size)
-plt.bar(list(hist.keys()), hist.values(), color='g')
-plt.show()
+def normalize_histogram(hist):
+    total = 0
+    for x in hist.keys():
+        total += hist[x]
+    for x in hist.keys():
+        hist[x] = hist[x] / total
+    return hist
+
+#for m in range(2,10):
+#    graph = nx.grid_graph([m*5,m*5])
+#    #graph = make_graph(30*30,1)
+#    partition_list = make_partition_list(graph, number_trees)
+#    expectation(graph, partition_list, cut_size)
+#    hist = make_histogram(graph, partition_list, cut_size)
+#    plt.xlim(0,max(hist.keys()) + 1)
+#    plt.bar(list(hist.keys()), hist.values(), color='g')
+#    name = " grid_graph "  + "size: " + str( m*5) + "by" + str(m*5) +  " number_trees:" + str(number_trees)
+#    plt.savefig(name)
+#    print("made", name)
+    
+batch_number_trees = 100
+num_batches = 10
+#Need to do it in batches to avoid heavy memory use
+histograms = []
+
+for m in range(10,11):
+    histograms = []
+    for i in range(num_batches):
+        graph = make_graph((m*5)**2,1)
+        partition_list = make_partition_list(graph, number_trees)
+        hist = make_histogram(graph, partition_list, cut_size)
+        histograms.append(hist)
+    hist = histograms[0]
+    histograms.remove(hist)
+    for histogram in histograms:
+        hist = merge_historgrams(hist, histogram)
+    hist = normalize_histogram(hist)
+    plt.xlim(0,max(hist.keys()) + 1)
+    plt.bar(list(hist.keys()), hist.values(), color='g')
+    name = "poisson_triangulation "  + "size: " + str( (m*5)**2) +  " number_trees:" + str(number_trees)
+    plt.savefig(name)
+    print("made", name)
 
 #Here's a practical issue - the numbers here are literally too big to do importance sampling with.
 
