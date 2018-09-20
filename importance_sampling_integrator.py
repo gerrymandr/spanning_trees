@@ -132,8 +132,9 @@ def normalize_histogram(hist):
 #    plt.savefig(name)
 #    print("made", name)
     
-batch_number_trees = 100
-num_batches = 10
+    
+batch_number_trees = 1000
+num_batches = 100
 #Need to do it in batches to avoid heavy memory use
 histograms = []
 
@@ -141,7 +142,7 @@ for m in range(10,11):
     histograms = []
     for i in range(num_batches):
         graph = make_graph((m*5)**2,1)
-        partition_list = make_partition_list(graph, number_trees)
+        partition_list = make_partition_list(graph, batch_number_trees)
         hist = make_histogram(graph, partition_list, cut_size)
         histograms.append(hist)
     hist = histograms[0]
@@ -151,7 +152,7 @@ for m in range(10,11):
     hist = normalize_histogram(hist)
     plt.xlim(0,max(hist.keys()) + 1)
     plt.bar(list(hist.keys()), hist.values(), color='g')
-    name = "poisson_triangulation "  + "size: " + str( (m*5)**2) +  " number_trees:" + str(number_trees)
+    name = "poisson_triangulation "  + "size: " + str( (m*5)**2) +  " number_trees:" + str(batch_number_trees * num_batches)
     plt.savefig(name)
     print("made", name)
 
