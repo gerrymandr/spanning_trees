@@ -6,14 +6,17 @@ Created on Sun Sep 16 13:38:04 2018
 """
 from projection_tools import cut_edges
 from main import explore_random
-from Broder_Wilson_algorithms import random_spanning_tree_wilson
+from Broder_Wilson_algorithms import random_spanning_tree_wilson, random_spanning_tree
 from projection_tools import remove_edges_map 
+from equi_partition_tools import almost_equi_split
 import random
 import networkx as nx
 from tree_tools import log_number_trees
 import numpy as np
 from point_process import make_graph, viz
 
+import matplotlib.pyplot as plt
+    
 class partition_class:
     def __init__(self, graph, partition, tree, edge,total_number_trees_edges_pairs):
         self.partition = partition
@@ -59,22 +62,31 @@ def integrate(list_of_partitions, function):
     return total / len(list_of_partitions)
 
 
-def make_partition_list(graph, number_samples = 100):
+def make_partition_list(graph, number_samples = 100, tree_algorithm = random_spanning_tree_wilson, equi = True):
     
     #Note -- currently this is configured only for 2 partitions
     total_number_trees_edges_pairs = np.exp(log_number_trees(graph))*(len(graph.nodes()) - 1)
     
     uniform_trees = []
-    for i in range(number_trees):
-        uniform_trees.append(random_spanning_tree_wilson(graph))
+    for i in range(number_samples):
+        uniform_trees.append(tree_algorithm(graph))
         
     partitions = []
     for tree in uniform_trees:
-        e = random.choice(list(tree.edges()))
-        blocks = remove_edges_map(graph, tree, [e])
-        new_partition = partition_class(graph, blocks, tree, e, total_number_trees_edges_pairs)
-        new_partition.set_likelihood()
-        partitions.append(new_partition)
+        if equi == -1:
+            e = random.choice(list(tree.edges()))
+            blocks = remove_edges_map(graph, tree, [e])
+            new_partition = partition_class(graph, blocks, tree, e, total_number_trees_edges_pairs)
+            new_partition.set_likelihood()
+            partitions.append(new_partition)
+        else:
+            out = almost_equi_split(tree, 2,.1)
+            if out != None:
+                e = out[0]
+                blocks = remove_edges_map(graph, tree, [e])
+                new_partition = partition_class(graph, blocks, tree, e, total_number_trees_edges_pairs)
+                new_partition.set_likelihood()
+                partitions.append(new_partition)
     return partitions
 
 def estimate_number_partitions(graph, partition_list):
@@ -96,7 +108,7 @@ def make_histogram(graph, list_of_partitions, function):
         values[function(partition)] = 0
         total_likelihood += 1
     for partition in list_of_partitions:
-        values[function(partition)] += 1 / total_likelihood
+        values[function(partition)] += 1 
     return values
 
 def merge_historgrams(histogram_1, histogram_2):
@@ -132,29 +144,72 @@ def normalize_histogram(hist):
 #    plt.savefig(name)
 #    print("made", name)
     
-    
 batch_number_trees = 1000
 num_batches = 100
 #Need to do it in batches to avoid heavy memory use
 histograms = []
+equi = True
 
-for m in range(10,11):
-    histograms = []
-    for i in range(num_batches):
-        graph = make_graph((m*5)**2,1)
-        partition_list = make_partition_list(graph, batch_number_trees)
-        hist = make_histogram(graph, partition_list, cut_size)
-        histograms.append(hist)
-    hist = histograms[0]
-    histograms.remove(hist)
-    for histogram in histograms:
-        hist = merge_historgrams(hist, histogram)
-    hist = normalize_histogram(hist)
-    plt.xlim(0,max(hist.keys()) + 1)
-    plt.bar(list(hist.keys()), hist.values(), color='g')
-    name = "poisson_triangulation "  + "size: " + str( (m*5)**2) +  " number_trees:" + str(batch_number_trees * num_batches)
-    plt.savefig(name)
-    print("made", name)
+plt.ioff()
+
+def grid(m):
+    return nx.grid_graph([m*5,m*5])
+
+def uniform(m):
+    return make_graph((m*5)**2,1)
+
+for graph_type in [grid, uniform]:
+    for m in range(5,10):
+        for equi in [0,.05,.1,-1]:
+            graph = graph_type(m)
+            for v in graph.nodes():
+                graph.node[v]["POP10"] = 1
+            histograms = []
+            for i in range(num_batches):
+    
+                partition_list = make_partition_list(graph, batch_number_trees, random_spanning_tree_wilson, equi)
+                hist = make_histogram(graph, partition_list, cut_size)
+                histograms.append(hist)
+                print("finished batch", i)
+            hist = histograms[0]
+            histograms.remove(hist)
+            for histogram in histograms:
+                hist = merge_historgrams(hist, histogram)
+            hist = normalize_histogram(hist)
+            plt.xlim(0,max(hist.keys()) + 1)
+            plt.bar(list(hist.keys()), hist.values(), color='g')
+            num_trees = batch_number_trees * num_batches
+            name = "graph type: " + str(graph_type.__name__)  + " size: " + str(m) +  " number_trees: "  + str( num_trees)  + " equi deviation in percent: " + str(int(equi*100))
+            plt.savefig(name)
+            print("made", name)
+        
+#    
+#histograms = []
+#
+#for m in range(2,3):
+#    graph =    nx.erdos_renyi_graph((m*5)**2, .7)
+#    while nx.is_connected(graph) == False:
+#        graph =    nx.gnm_random_graph((m*5)**2, m*5, 1)
+#    print("succeeded in drawing a random graph")
+#    histograms = []
+#    for i in range(num_batches):
+#
+#        partition_list = make_partition_list(graph, batch_number_trees, random_spanning_tree)
+#        #I think that Broder's algorithm will be faster for this class of graphs
+#        hist = make_histogram(graph, partition_list, cut_size)
+#        histograms.append(hist)
+#        print("finished batch", i)
+#    hist = histograms[0]
+#    histograms.remove(hist)
+#    for histogram in histograms:
+#        hist = merge_historgrams(hist, histogram)
+#    hist = normalize_histogram(hist)
+#    plt.xlim(0,max(hist.keys()) + 1)
+#    plt.bar(list(hist.keys()), hist.values(), color='g')
+#    name = "erdos renyi "  + "size: " + str( (m*5)**2) +  " number_trees:" + str(batch_number_trees * num_batches)
+#    plt.savefig(name)
+#    print("made", name)
+# 
 
 #Here's a practical issue - the numbers here are literally too big to do importance sampling with.
 
@@ -186,24 +241,3 @@ def test():
     print(estimate_number_partitions(graph, ongoing_partition_list))
 
 #TODO -- figure out how to compute the distribution for divide and conquer
-#
-##Both of these estimators might be inconsistant. See here: https://stats.stackexchange.com/questions/367534/whats-the-best-estimator-for-expectation-if-we-can-draw-samples-iid-and-we-kn
-#def expectation(graph, list_of_partitions, function):
-#    #This computes expectations against the tree measure
-#
-#    total = 0
-#    total_likelihood = 0
-#    for partition in list_of_partitions:
-#        total += function(partition) * partition.likelihood
-#        total_likelihood += partition.likelihood
-#    return total / total_likelihood
-#
-#def make_histogram(graph, list_of_partitions, function):
-#    values = {}
-#    total_likelihood = 0
-#    for partition in list_of_partitions:
-#        values[function(partition)] = 0
-#        total_likelihood += partition.likelihood
-#    for partition in list_of_partitions:
-#        values[function(partition)] += function(partition)*partition.likelihood / total_likelihood
-#    return values
