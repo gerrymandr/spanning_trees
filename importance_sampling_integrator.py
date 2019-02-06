@@ -48,7 +48,7 @@ def cut_size(partition):
 def likelihood_function(partition):
     return partition.likelihood
 
-def lambda_weighted(partition):
+def weighted_measure(partition):
     weight = 3
     return weight**cut_size(partition) / likelihood_function(partition)
 
@@ -92,6 +92,9 @@ def make_partition_list(graph, number_samples = 100, tree_algorithm = random_spa
                 new_partition.set_likelihood()
                 partitions.append(new_partition)
     return partitions
+
+def estimate_weighted_partition_function(graph, partition_list):
+    return integrate(partition_list, weighted_measure)
 
 def estimate_number_partitions(graph, partition_list):
 
