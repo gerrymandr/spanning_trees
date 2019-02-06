@@ -48,6 +48,10 @@ def cut_size(partition):
 def likelihood_function(partition):
     return partition.likelihood
 
+def lambda_weighted(partition):
+    weight = 3
+    return weight**cut_size(partition) / likelihood_function(partition)
+
 def constant_function(partition):
     return 1
 
