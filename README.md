@@ -1,1 +1,0 @@
-# spanning_trees
